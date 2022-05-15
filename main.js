@@ -38,7 +38,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             //id('debug').textContent = JSON.stringify(mods, null, 2);//DEBUG
             //id('debug').className = '';//DEBUG
         } else {
-            if (confirm('dbg:redirect?')) window.location.replace('https://github.com/a-sync/arma3pregen');
+            if (confirm('Redirect to the README?'))window.location.replace('https://github.com/a-sync/arma3pregen');
+            else id('loading-text').textContent = 'No IDs detected.';//dbg
         }
     } catch (err) {
         console.error(err);
