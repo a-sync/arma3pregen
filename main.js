@@ -19,19 +19,24 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
+    document.addEventListener('hashchange', function () {
+        console.log('The hash has changed!');//debug
+    }, false);
+
     try {
         const presetData = parseUrl();
         if (presetData.ids.length > 0) {
             console.log('dbg:presetData', presetData);//DEBUG
             const preset = await parsePresetData(presetData);
-            console.log('dbg:preset', preset);//DEBUG
 
-            render([preset]);
+            console.log('dbg:preset', preset);//DEBUG
+            render([preset]);//debug
 
             id('loading').className = 'dnone';
             id('main').className = '';
 
             //id('debug').textContent = JSON.stringify(mods, null, 2);//DEBUG
+            //id('debug').className = '';//DEBUG
         } else {
             if (confirm('dbg:redirect?')) window.location.replace('https://github.com/a-sync/arma3pregen');
         }
@@ -91,45 +96,49 @@ async function parsePresetData(presetData) {
     }
 
     if (dlcAppIds.length) {
-        console.log('#### dlcAppIds', dlcAppIds);//debug
         const dlcs = await fetch('backend/', {
             method: 'POST',
             headers: { 'content-type': 'application/json' },
             body: JSON.stringify({ api: 'app', payload: dlcAppIds })
         }).then(res => res.json());
-        console.log('#### dlcs', dlcs);//debug
+
         for (const d of dlcs.response) {
             d._dlc = '!' + d.steam_appid;
             modDetails.push(d);
         }
     }
 
+    console.log('##### modDetails', modDetails);//debug
+
+    //DEBUG: hax to convert format to OLD version
+    ////###############################################
     const preset = {
         name: presetData.name,
         html: presetData.name + '.html',
         mods: {
             required: [],
-            optional: [],
-            dlc: []
+            optional: []
         }
     };
 
     const addMod = (newMod, required, local) => {
+        let id = '';
         let name = '';
         let link = '';
-        if (newMod._dlc) {
+
+        if (Boolean(newMod._dlc)) {
+            id = newMod.steam_appid;
             name = newMod.name;
-            link = 'https://store.steampowered.com/app/' + newMod.steam_appid;
-            preset.mods.dlc.push({ name: newMod.name, link, dlc: true, id: newMod.steam_appid });
+            link = 'https://store.steampowered.com/app/' + id;
+        } else if (local) {
+            id = newMod.name;
+            name = id;
         } else {
-            if (!local) {
-                name = newMod.title;
-                link = 'http://steamcommunity.com/sharedfiles/filedetails/?id=' + newMod.publishedfileid;
-            } else {
-                name = newMod.name;
-            }
-            preset.mods[required ? 'required' : 'optional'].push({ name, link, dlc: false, id: newMod.publishedfileid });
+            id = newMod.publishedfileid;
+            name = newMod.title;
+            link = 'http://steamcommunity.com/sharedfiles/filedetails/?id=' + id;
         }
+        preset.mods[required ? 'required' : 'optional'].push({ id, name, link, dlc: Boolean(newMod._dlc) });
     };
 
     for (const mData of presetData.ids) {
@@ -138,7 +147,7 @@ async function parsePresetData(presetData) {
         } else {
             if (mData.dlc) {
                 const mod = modDetails.find(m => mData.id === m._dlc);
-                if (mod) addMod(mod);
+                if (mod) addMod(mod, mData.required);
             } else {
                 const mod = modDetails.find(m => mData.id === m.publishedfileid);
                 if (mod) {
@@ -275,12 +284,20 @@ function render(presets) {
     for (const p of presets) {
         const name = e('td', p.name);
 
-        const req = e('td', String(p.mods.required.length));
-        if (p.mods.dlc.length) {
-            const dlc = e('span', (p.mods.dlc.length > 1 ? p.mods.dlc.length + ' ' : '') + 'DLC');
-            dlc.title = p.mods.dlc.map(m => m.name).join(', ');
+        console.log('p.mods', p.mods);//debug
+        const dlcReq = p.mods.required.filter(m => Boolean(m.dlc));
+        const dlcOpt = p.mods.optional.filter(m => Boolean(m.dlc));
+        console.log('dlcReq, dlcOpt', dlcReq, dlcOpt);//debug
+
+        //required col
+        const req = e('td', String(p.mods.required.length - dlcReq.length));
+        if (dlcReq.length) {
+            console.log('dlcReq');
+            const dlc = e('span', (dlcReq.length > 1 ? dlcReq.length + ' ' : '') + 'DLC');
+            dlc.title = dlcReq.map(m => m.name).join(', ');
             req.append(new Text(' + '), dlc);
         }
+
         const show_btn = e('button', 'SHOW');
         show_btn.className = 'show_btn';
         show_btn.addEventListener('click', () => {
@@ -288,15 +305,25 @@ function render(presets) {
         });
         req.append(show_btn);
 
+        // optional col
         const opt = e('td');
         const ls_opt_count = Object.keys(JSON.parse(window.localStorage[p.html] || '{}')).length;
         const opt_selected = e('span', String(ls_opt_count));
+
+        opt.append(opt_selected, new Text(' / ' + String(p.mods.optional.length - dlcOpt.length)));
+        if (dlcOpt.length) {
+            console.log('dlcOpt');
+            const dlc = e('span', (dlcOpt.length > 1 ? dlcOpt.length + ' ' : '') + 'DLC');
+            dlc.title = dlcOpt.map(m => m.name).join(', ');
+            opt.append(new Text(' + '), dlc);
+        }
+
         const select_btn = e('button', 'SELECT');
         select_btn.className = 'select_btn';
         select_btn.addEventListener('click', () => {
             showModsModal('optional', p, opt_selected);
         });
-        opt.append(opt_selected, new Text(' / ' + String(p.mods.optional.length)), select_btn);
+        opt.append(select_btn);
 
         const dl = e('td');
         const dl_link = e('a', p.html);
@@ -322,7 +349,7 @@ function showModsModal(type, preset, opt_selected) {
 
     id('dialog-content').replaceChildren();
     const ol = e('ol');
-    const mods = type === 'optional' ? preset.mods.optional : preset.mods.dlc.concat(preset.mods.required);
+    const mods = type === 'optional' ? preset.mods.optional : preset.mods.required;
     for (const m of mods) {
         const li = e('li');
 
@@ -361,6 +388,7 @@ function showModsModal(type, preset, opt_selected) {
         if (m.link.indexOf('store.steampowered.com/app/') !== -1) {
             li.prepend(new Text(' ❗'));
         }
+
         ol.append(li);
     }
     id('dialog-content').append(ol);
@@ -386,6 +414,8 @@ function downloadPreset(preset) {
     }
 
     const modcontainers = mods.map(m => {
+        if (Boolean(m.dlc)) return '';
+
         let from = 'local">Local';
         let local = '';
         let link = '';
@@ -397,13 +427,13 @@ function downloadPreset(preset) {
             link = '<a href="' + m.link + '" data-type="Link">' + m.link + '</a>';
         }
 
-        return '<tr data-type="ModContainer"><td data-type="DisplayName">' + dn + '</td><td><span class="from-' + from + '</span></td><td>' + local + link + '</td></tr>';
+        return '<tr data-type="ModContainer"><td data-type="DisplayName">' + m.name + '</td><td><span class="from-' + from + '</span></td><td>' + local + link + '</td></tr>';
         // // TODO: local
         // // http://steamcommunity.com/sharedfiles/filedetails/?id=
         // return '<tr data-type="ModContainer"><td data-type="DisplayName">' + m.name + '</td><td><span class="from-steam">Steam</span></td><td><a href="' + m.link + '" data-type="Link">' + m.link + '</a></td></tr>';
     });
 
-    const dlccontainers = preset.mods.dlc.map(m => '<tr data-type="DlcContainer"><td data-type="DisplayName">' + m.name + '</td><td><a href="' + m.link + '" data-type="Link">' + m.link + '</a></td></tr>');
+    const dlccontainers = mods.filter(m => Boolean(m.dlc)).map(m => '<tr data-type="DlcContainer"><td data-type="DisplayName">' + m.name + '</td><td><a href="' + m.link + '" data-type="Link">' + m.link + '</a></td></tr>');
 
     const source = preset_template
         .replaceAll('{PRESET_NAME}', preset.name)
