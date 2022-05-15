@@ -1,0 +1,283 @@
+@import url('https://fonts.googleapis.com/css?family=Black+Ops+One&display=swap');
+
+html, body {
+    scroll-behavior: smooth;
+    min-height: 100%;
+}
+
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+}
+
+h1, h2, h3 {
+    /*Orbitron*/
+    font-family: 'Black Ops One', Helvetica, Arial, sans-serif;
+}
+
+.center {
+    text-align: center;
+}
+/* 
+#loading .spinner {
+    position: relative;
+    display: inline-block;
+    width: 20px;
+    vertical-align: middle;
+}
+
+@keyframes spinner {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.spinner:before {
+    content: '';
+    box-sizing: border-box;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin-top: -10px;
+    margin-left: -10px;
+    border-radius: 50%;
+    border-top: 2px solid #07d;
+    border-right: 2px solid transparent;
+    animation: spinner .6s linear infinite;
+}
+*/
+
+#snek {
+    position: relative;
+    top: 50%;
+    left: 50%;
+    height: 1rem;
+    width: 1rem;
+    transform: translateX(-50%) translateY(-50%);
+}
+
+.spinner {
+    position: absolute;
+    top: 2rem;
+    left: 0;
+    height: 1rem;
+    width: 1rem;
+}
+
+.spinner>.item {
+    position: absolute;
+    height: 1rem;
+    width: 1rem;
+    background: #fff;
+    -webkit-animation: move 0.5s linear infinite;
+    animation: move 0.5s linear infinite;
+}
+
+.spinner>.item:nth-of-type(1) {
+    top: -1rem;
+    left: -1rem;
+    -webkit-animation-delay: 0s;
+    animation-delay: 0s;
+}
+
+.spinner>.item:nth-of-type(2) {
+    top: -1rem;
+    left: 0;
+    -webkit-animation-delay: -0.0625s;
+    animation-delay: -0.0625s;
+}
+
+.spinner>.item:nth-of-type(3) {
+    top: -1rem;
+    left: 1rem;
+    -webkit-animation-delay: -0.125s;
+    animation-delay: -0.125s;
+}
+
+.spinner>.item:nth-of-type(4) {
+    top: 0;
+    left: 1rem;
+    -webkit-animation-delay: -0.1875s;
+    animation-delay: -0.1875s;
+}
+
+.spinner>.item:nth-of-type(5) {
+    top: 1rem;
+    left: 1rem;
+    -webkit-animation-delay: -0.25s;
+    animation-delay: -0.25s;
+}
+
+.spinner>.item:nth-of-type(6) {
+    top: 1rem;
+    left: 0;
+    -webkit-animation-delay: -0.3125s;
+    animation-delay: -0.3125s;
+}
+
+.spinner>.item:nth-of-type(7) {
+    top: 1rem;
+    left: -1rem;
+    -webkit-animation-delay: -0.375s;
+    animation-delay: -0.375s;
+}
+
+.spinner>.item:nth-of-type(8) {
+    top: 0;
+    left: -1rem;
+    -webkit-animation-delay: -0.4375s;
+    animation-delay: -0.4375s;
+}
+
+@-webkit-keyframes move {
+    0% {
+        opacity: 0;
+    }
+
+    10% {
+        opacity: 1;
+    }
+
+    70% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 0;
+    }
+}
+
+@keyframes move {
+    0% {
+        opacity: 0;
+    }
+
+    10% {
+        opacity: 1;
+    }
+
+    70% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 0;
+    }
+}
+
+#loading-text {
+    margin-top: 4rem;
+}
+
+.dnone {
+    display: none;
+}
+
+table tr th,
+table tr td {
+    text-align: center;
+    vertical-align: middle;
+}
+
+table tr th:first-child,
+table tr td:first-child {
+    text-align: left;
+}
+
+table tr th:last-child,
+table tr td:last-child {
+    text-align: right;
+}
+
+#presets-body td:last-child a,
+#mods-title a {
+    cursor: pointer;
+    font-size: 0.7rem;
+}
+
+#presets-body td button {
+    margin: 0 0 0 10px;
+    padding: 4px 8px;
+    font-size: 0.6rem;
+    font-weight: bold;
+}
+
+.show_btn, 
+tbody tr:nth-child(2n) .show_btn {
+    background-color: orangered;
+}
+
+.select_btn,
+tbody tr:nth-child(2n) .select_btn {
+    background-color: olivedrab;
+}
+
+#mods-title {
+    font-weight: bold;
+    text-align: left;
+}
+
+#dialog-header button {
+    padding: 7px;
+    margin: 0;
+}
+
+#dialog-header button:focus,
+#dialog-content input[type=checkbox]:focus {
+    border: 0;
+    box-shadow: none;
+}
+
+#dialog-header {
+    padding: 10px 20px;
+}
+
+#dialog-content {
+    display: flex;
+    flex-flow: column;
+    align-items: flex-start;
+    padding: 10px 20px;
+    margin: -10px -30px -10px;
+}
+
+#dialog-content ol {
+    margin: 0 5px;
+}
+
+#dialog-content ol li input[type=checkbox] + a {
+    opacity: .6;
+    font-style: italic;
+}
+
+#dialog-content ol li input[type=checkbox]:checked + a {
+    opacity: 1;
+    font-style: normal;
+}
+
+dialog + .backdrop {
+    background: rgba(0,0,0,.61);
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+}
+
+summary:focus, summary:hover {
+    text-decoration: none;
+}
+
+summary:focus span, summary:hover span {
+    text-decoration: underline;
+}
+
+footer sup {
+    font-size: 0.6rem;
+}
+
+@media (prefers-color-scheme: dark) {
+    footer a.github {
+        fill: #c6cbd1;
+    }
+}

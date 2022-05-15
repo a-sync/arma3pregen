@@ -1,0 +1,26 @@
+name: Deploy php site
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+
+  deploy:
+    name: 🚀 Deploy sources
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🚚 Get latest code
+        uses: actions/checkout@v2
+
+      - name: 📂 Sync files
+        uses: SamKirkland/FTP-Deploy-Action@4.1.0
+        with:
+          server: "${{ secrets.FTP_HOSTNAME }}"
+          username: "${{ secrets.FTP_USERNAME }}"
+          password: "${{ secrets.FTP_PASSWORD }}"
+          server-dir: "arma3pregen/"
+          exclude: "[**/.git*, **/.git*/**, docker-compose.yml]"
+          dry-run: true #DEBUG
