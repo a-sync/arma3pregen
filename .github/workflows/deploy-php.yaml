@@ -22,5 +22,5 @@ jobs:
           username: "${{ secrets.FTP_USERNAME }}"
           password: "${{ secrets.FTP_PASSWORD }}"
           server-dir: "/"
-          exclude: "[**/.git*, **/.git*/**, docker-compose.yml, server.ts, server.js, backend/index.ts, backend/index.js]"
+          exclude: "[**/.git*, **/.git*/**]"
           dry-run: false #DEBUG
