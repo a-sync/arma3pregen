@@ -1,12 +1,12 @@
 name: Deploy php site
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
 
 jobs:
-
   deploy:
     name: 🚀 Deploy sources
     runs-on: ubuntu-latest
@@ -21,6 +21,6 @@ jobs:
           server: "${{ secrets.FTP_HOSTNAME }}"
           username: "${{ secrets.FTP_USERNAME }}"
           password: "${{ secrets.FTP_PASSWORD }}"
-          server-dir: "arma3pregen/"
-          exclude: "[**/.git*, **/.git*/**, docker-compose.yml]"
-          dry-run: true #DEBUG
+          server-dir: "/"
+          exclude: "[**/.git*, **/.git*/**, docker-compose.yml, server.ts, server.js, backend/index.ts, backend/index.js]"
+          dry-run: false #DEBUG

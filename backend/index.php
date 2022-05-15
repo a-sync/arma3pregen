@@ -28,12 +28,13 @@ try {
             ];
         } elseif ($_POST['api'] === 'app') {
             $response = [];
-            foreach ($idList as $appId) {
+            foreach ($idList as $id) {
+                $appId = intval($id);
                 try {
                     $res = file_get_contents('https://store.steampowered.com/api/appdetails?appids=' . $appId);
                     $json = json_decode($res, true);
-                    if (isset($json[(int) $appId]) && $json[(int) $appId]['success'] === true) {
-                        $response[] = $json[(int) $appId]['data'];
+                    if (isset($json[$appId]) && $json[$appId]['success'] === true) {
+                        $response[] = $json[$appId]['data'];
                     }
                 } catch (Error $err) {}
             }
