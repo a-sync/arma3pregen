@@ -39,29 +39,29 @@ Only numbers and the optional `*` prefix/suffix is allowed.
 
 ### Examples:
  * FNF: `https://arma3pregen.devs.space/?FNF#1551644814,1551648858*`
-   * [FNF Required Mods Collection](https://steamcommunity.com/sharedfiles/filedetails/?id=1551644814)
-   * _[FNF Optional Mods Collection](https://steamcommunity.com/sharedfiles/filedetails/?id=1551648858)_
+   * [FNF Required Mods Collection](https://steamcommunity.com/sharedfiles/filedetails/?id=1551644814) (collection)
+   * _[FNF Optional Mods Collection](https://steamcommunity.com/sharedfiles/filedetails/?id=1551648858) (collection)_
  * 77th JSOC: `https://arma3pregen.devs.space/?77th_JSOC#879092974*`
-   * _[77th JSOC | Public Servers Mod Collection (Official)](https://steamcommunity.com/sharedfiles/filedetails/?id=879092974)_
- * C4G RHS KoTH: `http://arma3pregen.devs.space/?C4G_RHS#1290398866,*861133494,*945476727,*1180534892,*1180533757`
+   * _[77th JSOC | Public Servers Mod Collection (Official)](https://steamcommunity.com/sharedfiles/filedetails/?id=879092974) (collection)_
+ * C4G RHS KoTH: `https://arma3pregen.devs.space/?C4G_RHS#1290398866,*861133494,*945476727,*1180534892,*1180533757`
    * [RHS - King of the Hill by Sa-Matra](https://steamcommunity.com/sharedfiles/filedetails/?id=1290398866) (collection)
    * _[JSRS SOUNDMOD](https://steamcommunity.com/sharedfiles/filedetails/?id=861133494)_
    * _[JSRS SOUNDMOD - RHS AFRF Mod Pack Sound Support](https://steamcommunity.com/sharedfiles/filedetails/?id=945476727)_
    * _[JSRS SOUNDMOD - RHS GREF Mod Pack Sound Support](https://steamcommunity.com/sharedfiles/filedetails/?id=1180534892)_
    * _[JSRS SOUNDMOD - RHS USAF Mod Pack Sound Support](https://steamcommunity.com/sharedfiles/filedetails/?id=1180533757)_
- * Custom: `http://arma3pregen.devs.space/?My_Custom_Vietnam_Modlist_2022q2#!1227700,450814997,463939057,@my_local_mod,*333310405,*@optional_local_mod,*!288520`
-   * **[Arma 3 Creator DLC: S.O.G. Prairie Fire](https://store.steampowered.com/app/1227700)**
+ * Custom: `https://arma3pregen.devs.space/?My_Custom_Vietnam_Modlist_2022q2#!1227700,450814997,463939057,@my_local_mod,*333310405,*@optional_local_mod,*!288520`
+   * [Arma 3 Creator DLC: S.O.G. Prairie Fire](https://store.steampowered.com/app/1227700) (DLC)
    * [CBA_A3](https://steamcommunity.com/sharedfiles/filedetails/?id=450814997)
    * [ace](https://steamcommunity.com/sharedfiles/filedetails/?id=463939057)
    * @my_local_mod local mod file.
    * _[Enhanced Movement](https://steamcommunity.com/sharedfiles/filedetails/?id=333310405)_
    * _@optional_local_mod_
-   * **_[Arma 3 Karts](https://store.steampowered.com/app/288520)_**
+   * _[Arma 3 Karts](https://store.steampowered.com/app/288520) (DLC)_
 
 ## Runing locally
 _PHP ~~or Nodejs~~ runtime is required to relay backend calls to the steam API. (cors disabled)_  
 Eg.:  
- - nodejs: `node server.js`
+ - ~~nodejs: `node server.js`~~
  - php: `php -S 0.0.0.0:80`
  - docker (php): `docker-compose up`
 
@@ -72,3 +72,5 @@ Open `http://localhost:80/` in a browser.
  * add backend caching (nodb)
  * shortlink support (nodb backend)
    * custom logo url
+ * copy to clipboard?
+

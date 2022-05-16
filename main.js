@@ -23,23 +23,39 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.log('The hash has changed!');//debug
     }, false);
 
+    const {lastUpdated} = await init();
+    if (lastUpdated) {
+        const sup = e('sup', 'Last updated @ ' + lastUpdated);
+        id('footer').prepend(sup, e('br'));
+
+        id('dl-button').addEventListener('click', event => {
+            console.log('download! what?');
+        });
+    }
+});
+
+async function init() {
+    let lastUpdated = 0;
+
     try {
-        const presetData = parseUrl();
-        if (presetData.ids.length > 0) {
-            console.log('dbg:presetData', presetData);//DEBUG
-            const preset = await parsePresetData(presetData);
+        const presetIds = parseUrl();
+        console.log('dbg:presetIds', presetIds);
+        id('dl-button-text').textContent = presetIds.name + '.html';
+        if (presetIds.ids.length > 0) {
+            const presetData = await parsePresetIds(presetIds);
+            console.log('dbg:presetData', presetData);
 
-            console.log('dbg:preset', preset);//DEBUG
-            render([preset]);//debug
-
+            render2(presetData);//DEBUG
             id('loading').className = 'dnone';
             id('main').className = '';
 
-            //id('debug').textContent = JSON.stringify(mods, null, 2);//DEBUG
-            //id('debug').className = '';//DEBUG
+            //DBG
+            //id('debug').textContent = JSON.stringify(mods, null, 2);
+            //id('debug').className = '';
+            //--DBG
         } else {
-            if (confirm('Redirect to the README?'))window.location.replace('https://github.com/a-sync/arma3pregen');
-            else id('loading-text').textContent = 'No IDs detected.';//dbg
+            if (confirm('Redirect to the README?')) window.location.replace('https://github.com/a-sync/arma3pregen');
+            else id('loading').textContent = 'No IDs detected.';//dbg
         }
     } catch (err) {
         console.error(err);
@@ -48,22 +64,29 @@ document.addEventListener('DOMContentLoaded', async () => {
         id('loading').append(pre);
     }
 
-    //const sup = e('sup', 'Last updated @ ' + updated);
-    //id('footer').prepend(sup, e('br'));
-});
+    return {lastUpdated};
+}
 
-async function parsePresetData(presetData) {
+async function parsePresetIds(presetData) {
     const modIds = [];
     const collectionChildren = {};
     const modDetails = [];
-
     const workshopIds = [];
     const dlcAppIds = [];
+    const optionalFlags = {};
     for (const i of presetData.ids) {
-        if (!i.local) {
+        if (i.local) {
+            modDetails.push({
+                id: i.id,
+                _local: true
+            });
+        } else {
             if (i.dlc) dlcAppIds.push(i.id.slice(1));
             else workshopIds.push(i.id);
         }
+
+        if (i.required) optionalFlags[i.id] = false;
+        else optionalFlags[i.id] = true;
     }
 
     const collections = await fetch('backend/', {
@@ -76,6 +99,11 @@ async function parsePresetData(presetData) {
         for (const cd of collections.response.collectiondetails) {
             if (cd.result === 1 && cd.children && cd.children.length > 0) {
                 collectionChildren[cd.publishedfileid] = cd.children.map(cdc => {
+                    if (optionalFlags[cdc.publishedfileid] === undefined) {
+                        //TODO: or if collection id comes after the mod id or missing in the workshopId list
+                        //if missing, the latter collection state is inherited
+                        optionalFlags[cdc.publishedfileid] = Boolean(optionalFlags[cd.publishedfileid]);
+                    }
                     modIds.push(cdc.publishedfileid);
                     return cdc.publishedfileid;
                 });
@@ -109,7 +137,13 @@ async function parsePresetData(presetData) {
         }
     }
 
-    console.log('##### modDetails', modDetails);//debug
+    return modDetails.map(m => {
+        if (Boolean(m._dlc)) m._optional = Boolean(optionalFlags[m._dlc]);
+        else if (Boolean(m.publishedfileid)) m._optional = Boolean(optionalFlags[m.publishedfileid]);
+        else m._optional = Boolean(optionalFlags[m.id]);
+
+        return m;
+    });
 
     //DEBUG: hax to convert format to OLD version
     ////###############################################
@@ -175,6 +209,7 @@ function parseUrl() {
 
     if (loc.search.length > 1) {
         re.name = loc.search.slice(1).replaceAll(/\W/g, '');
+        if (re.name.length < 1) re.name = 'arma3pregen';
     }
 
     if (loc.hash.length > 1) {
@@ -199,81 +234,17 @@ function parseUrl() {
     return re;
 }
 
-// TODO: drag & drop preset html to generate url
-// returns [{name,mods:{required,optional,dlc},index,files,type}]
-// load and parse each preset file and return all the info
-function parsePresets(config) {
-    const presets = [];
+function render2(data) {
+    console.log('RENDER2.', typeof data);
+    for (const d of data) {
+        if (Boolean(d._dlc)) {
 
-    // parses the html source and returns regex results combined with additional data
-    const parseA3LPreset = (html_source, additional) => {
-        const name = html_source.match(/<meta name="arma:PresetName" content="(.*?)" \/>/);
-        const mods = html_source.matchAll(/<tr data-type="(Mod|Dlc)Container">[\s\S]*?<td data-type="DisplayName">(.*?)<\/td>[\s\S]*?<a href="(.*?)" data-type="Link">(.*?)<\/a>/g);
-        return {
-            name,
-            mods,
-            ...additional
+        } else if (d._local) {
+
+        } else {
+            //mod/collection
         }
-    };
-
-    // marshalls all requests together so we can run them parallel
-    const promises = config.reduce((p, files, index) => {
-        for (const type of ['required', 'optional']) {
-            if (files[type] !== undefined && files[type] !== '') {
-                p.push(fetch('servers-and-mods/' + files[type])
-                    .then(res => res.text())
-                    .then(text => parseA3LPreset(text, { index, files, type })));
-            }
-        }
-        return p;
-    }, []);
-
-    // wait for all the requests to resolve and sort / format the data
-    return Promise.all(promises.map(p => p.catch(e => e))).then(res_arr => {
-        for (const r of res_arr) {
-            if (r instanceof Error) {
-                console.error(r);
-            } else {
-                const html = r.files[r.type];
-                if (presets[r.index] === undefined) {
-                    presets[r.index] = {
-                        name: r.name ? r.name[1] : html,
-                        html: html,
-                        mods: {
-                            dlc: [],
-                            required: [],
-                            optional: []
-                        }
-                    };
-                }
-
-                if (r.type === 'required') {
-                    presets[r.index].name = r.name ? r.name[1] : html;
-                    presets[r.index].html = html;
-                }
-
-                for (const m of r.mods) {
-                    if (m[3] !== m[4]) {
-                        console.warn('Link mismatch', m);
-                    }
-
-                    if (m[1] === 'Mod') {
-                        presets[r.index].mods[r.type].push({
-                            name: m[2],
-                            link: m[3]
-                        });
-                    } else if (m[1] === 'Dlc') {
-                        presets[r.index].mods.dlc.push({
-                            name: m[2],
-                            link: m[3]
-                        });
-                    }
-                }
-            }
-        }
-
-        return presets;
-    });
+    }
 }
 
 // build a UI from all the presets data
@@ -447,4 +418,81 @@ function downloadPreset(preset) {
     document.body.append(element);
     element.click();
     element.remove();
+}
+
+// TODO: drag & drop preset html to generate url
+// returns [{name,mods:{required,optional,dlc},index,files,type}]
+// load and parse each preset file and return all the info
+function parsePresetsSource(config) {
+    const presets = [];
+
+    // parses the html source and returns regex results combined with additional data
+    const parseA3LPreset = (html_source, additional) => {
+        const name = html_source.match(/<meta name="arma:PresetName" content="(.*?)" \/>/);
+        const mods = html_source.matchAll(/<tr data-type="(Mod|Dlc)Container">[\s\S]*?<td data-type="DisplayName">(.*?)<\/td>[\s\S]*?<a href="(.*?)" data-type="Link">(.*?)<\/a>/g);
+        return {
+            name,
+            mods,
+            ...additional
+        }
+    };
+
+    // marshalls all requests together so we can run them parallel
+    const promises = config.reduce((p, files, index) => {
+        for (const type of ['required', 'optional']) {
+            if (files[type] !== undefined && files[type] !== '') {
+                p.push(fetch('servers-and-mods/' + files[type])
+                    .then(res => res.text())
+                    .then(text => parseA3LPreset(text, { index, files, type })));
+            }
+        }
+        return p;
+    }, []);
+
+    // wait for all the requests to resolve and sort / format the data
+    return Promise.all(promises.map(p => p.catch(e => e))).then(res_arr => {
+        for (const r of res_arr) {
+            if (r instanceof Error) {
+                console.error(r);
+            } else {
+                const html = r.files[r.type];
+                if (presets[r.index] === undefined) {
+                    presets[r.index] = {
+                        name: r.name ? r.name[1] : html,
+                        html: html,
+                        mods: {
+                            dlc: [],
+                            required: [],
+                            optional: []
+                        }
+                    };
+                }
+
+                if (r.type === 'required') {
+                    presets[r.index].name = r.name ? r.name[1] : html;
+                    presets[r.index].html = html;
+                }
+
+                for (const m of r.mods) {
+                    if (m[3] !== m[4]) {
+                        console.warn('Link mismatch', m);
+                    }
+
+                    if (m[1] === 'Mod') {
+                        presets[r.index].mods[r.type].push({
+                            name: m[2],
+                            link: m[3]
+                        });
+                    } else if (m[1] === 'Dlc') {
+                        presets[r.index].mods.dlc.push({
+                            name: m[2],
+                            link: m[3]
+                        });
+                    }
+                }
+            }
+        }
+
+        return presets;
+    });
 }

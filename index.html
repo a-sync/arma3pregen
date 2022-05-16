@@ -41,17 +41,22 @@
         <!--/DEBUG-->
 
         <section>
-            <h2>Presets</h2>
+            <header class="row">
+                <h2 id="link-snippet-headline">Preset details</h2>
+                <button type="button" id="dl-button">
+                    <span id="dl-button-feedback"></span>
+                    <span id="dl-button-text">Download arma3pregen.html</span>
+                </button>
+            </header>
             <table>
                 <thead>
                     <tr>
                         <th>Name</th>
-                        <th>Required mods</th>
-                        <th>Optional mods</th>
-                        <th>Download</th>
+                        <th>Flags</th>
+                        <th>Include</th>
                     </tr>
                 </thead>
-                <tbody id="presets-body"></tbody>
+                <tbody id="mods-body"></tbody>
             </table>
         </section>
 
@@ -64,8 +69,7 @@
                 </details>
                 <details>
                     <summary><span>Loading <b>Local mod</b>s</span></summary>
-                    <img src="https://user-images.githubusercontent.com/14183614/152661491-d9ba4ed2-6610-404a-8617-d3394d1c2765.gif"
-                        alt="" />
+                    <img src="https://user-images.githubusercontent.com/14183614/152661491-d9ba4ed2-6610-404a-8617-d3394d1c2765.gif" alt="" />
                 </details>
             </div>
         </section>
