@@ -19,9 +19,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    document.addEventListener('hashchange', function () {
+    document.addEventListener('hashchange', () => {
         console.log('The hash has changed!');//debug
-    }, false);
+    });
 
     const {lastUpdated} = await init();
     if (lastUpdated) {
@@ -39,13 +39,13 @@ async function init() {
 
     try {
         const presetIds = parseUrl();
-        console.log('dbg:presetIds', presetIds);
-        id('dl-button-text').textContent = presetIds.name + '.html';
+        // console.log('dbg:presetIds', presetIds);
+        id('dl-button-filename').textContent = presetIds.name;
         if (presetIds.ids.length > 0) {
             const presetData = await parsePresetIds(presetIds);
-            console.log('dbg:presetData', presetData);
+            // console.log('dbg:presetData', presetData);
 
-            render2(presetData);//DEBUG
+            render2(presetIds, presetData);//DEBUG
             id('loading').className = 'dnone';
             id('main').className = '';
 
@@ -147,57 +147,48 @@ async function parsePresetIds(presetData) {
 
     //DEBUG: hax to convert format to OLD version
     ////###############################################
-    const preset = {
-        name: presetData.name,
-        html: presetData.name + '.html',
-        mods: {
-            required: [],
-            optional: []
-        }
-    };
 
-    const addMod = (newMod, required, local) => {
-        let id = '';
-        let name = '';
-        let link = '';
 
-        if (Boolean(newMod._dlc)) {
-            id = newMod.steam_appid;
-            name = newMod.name;
-            link = 'https://store.steampowered.com/app/' + id;
-        } else if (local) {
-            id = newMod.name;
-            name = id;
-        } else {
-            id = newMod.publishedfileid;
-            name = newMod.title;
-            link = 'http://steamcommunity.com/sharedfiles/filedetails/?id=' + id;
-        }
-        preset.mods[required ? 'required' : 'optional'].push({ id, name, link, dlc: Boolean(newMod._dlc) });
-    };
+    // const addMod = (newMod, required, local) => {
+    //     let id = '';
+    //     let name = '';
+    //     let link = '';
 
-    for (const mData of presetData.ids) {
-        if (mData.local) {
-            addMod({ name: mData.id }, mData.required, mData.local);
-        } else {
-            if (mData.dlc) {
-                const mod = modDetails.find(m => mData.id === m._dlc);
-                if (mod) addMod(mod, mData.required);
-            } else {
-                const mod = modDetails.find(m => mData.id === m.publishedfileid);
-                if (mod) {
-                    if (mod._children) {
-                        for (const mc of mod._children) {
-                            const childMod = modDetails.find(m => mc === m.publishedfileid);
-                            if (childMod) addMod(childMod, mData.required);
-                        }
-                    } else addMod(mod, mData.required);
-                }
-            }
-        }
-    }
+    //     if (Boolean(newMod._dlc)) {
+    //         id = newMod.steam_appid;
+    //         name = newMod.name;
+    //         link = 'https://store.steampowered.com/app/' + id;
+    //     } else if (local) {
+    //         id = newMod.name;
+    //         name = id;
+    //     } else {
+    //         id = newMod.publishedfileid;
+    //         name = newMod.title;
+    //         link = 'http://steamcommunity.com/sharedfiles/filedetails/?id=' + id;
+    //     }
+    //     preset.mods[required ? 'required' : 'optional'].push({ id, name, link, dlc: Boolean(newMod._dlc) });
+    // };
 
-    return preset;
+    // for (const mData of presetData.ids) {
+    //     if (mData.local) {
+    //         addMod({ name: mData.id }, mData.required, mData.local);
+    //     } else {
+    //         if (mData.dlc) {
+    //             const mod = modDetails.find(m => mData.id === m._dlc);
+    //             if (mod) addMod(mod, mData.required);
+    //         } else {
+    //             const mod = modDetails.find(m => mData.id === m.publishedfileid);
+    //             if (mod) {
+    //                 if (mod._children) {
+    //                     for (const mc of mod._children) {
+    //                         const childMod = modDetails.find(m => mc === m.publishedfileid);
+    //                         if (childMod) addMod(childMod, mData.required);
+    //                     }
+    //                 } else addMod(mod, mData.required);
+    //             }
+    //         }
+    //     }
+    // }
 }
 
 function parseUrl() {
@@ -234,15 +225,55 @@ function parseUrl() {
     return re;
 }
 
-function render2(data) {
-    console.log('RENDER2.', typeof data);
-    for (const d of data) {
-        if (Boolean(d._dlc)) {
+function render2(ids, data) {
+    const getModById = (id) => {
+        console.log('getModById.id', id);
+        return data.find(v => {
+            if (id.slice(0, 1) === '@' && id === v.id) return true;
+            else if (id.slice(0, 1) === '!' && Number(id.slice(1)) === v.steam_appid) return true;
+            else if (id === v.publishedfileid) return true;
+            else return false;
+        });
+    };
 
-        } else if (d._local) {
+    const renderSingleMod = (mod) => {
+        let n = 'n/a';
+        if ('title' in mod) n = mod.title;
+        else if ('name' in mod) n = mod.name;
+        else if ('id' in mod) n = mod.id;
+        const name = e('td', n);
 
+        const f = [];
+        if (Boolean(mod._dlc)) f.push('DLC');
+        if (Boolean(mod._local)) f.push('Local Mod');
+        if (Boolean(mod._children)) f.push('Collection');
+        const flags = e('td', f.join(', '));
+
+        const include = e('td', Boolean(mod._optional) ? '[ ]' : '[x]');
+
+        const tr = e('tr');
+        tr.append(name, flags, include);
+        id('mods-body').append(tr);
+    };
+
+    console.log('RENDER2.', ids, data);
+    for (const i of ids.ids) {
+        const m = getModById(i.id);
+
+        if (m) {
+            renderSingleMod(m);
+            if (m._children) {
+                for (const c of m._children) {
+                    const cm = getModById(c);
+                    if (cm) {
+                        renderSingleMod(cm);
+                    } else {
+                        console.error('No mod found for child ID', cm);
+                    }
+                }
+            }
         } else {
-            //mod/collection
+            console.error('No mod found for ID', i.id);
         }
     }
 }
