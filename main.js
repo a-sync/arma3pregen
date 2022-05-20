@@ -1,4 +1,3 @@
-const ACCEPTED_APPIDS = ['107410'];
 // helpers
 const id = s => document.getElementById(s);
 const e = (type, text, options) => {
@@ -29,13 +28,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         id('footer').prepend(sup, e('br'));
 
         id('dl-button').addEventListener('click', event => {
-            console.log('download! what?');
+            console.log('download! what?');//debug
         });
     }
 });
 
 async function init() {
-    let lastUpdated = 0;
+    let lastUpdated = 1;
 
     try {
         const presetIds = parseUrl();
@@ -236,23 +235,44 @@ function render2(ids, data) {
         });
     };
 
-    const renderSingleMod = (mod) => {
+    const renderSingleItem = (i, mod, collection) => {
+        const tr = e('tr');
+        const td = e('td');
+
         let n = 'n/a';
         if ('title' in mod) n = mod.title;
         else if ('name' in mod) n = mod.name;
         else if ('id' in mod) n = mod.id;
-        const name = e('td', n);
 
-        const f = [];
-        if (Boolean(mod._dlc)) f.push('DLC');
-        if (Boolean(mod._local)) f.push('Local Mod');
-        if (Boolean(mod._children)) f.push('Collection');
-        const flags = e('td', f.join(', '));
+        if (Boolean(mod._dlc)) n += ' (DLC)';
+        if (Boolean(mod._local)) n += ' (Local Mod)';
 
-        const include = e('td', Boolean(mod._optional) ? '[ ]' : '[x]');
+        if (Boolean(mod._children)) {
+            const h3 = e('h3', n);
+            td.append(h3);
+            tr.append(td);
+        } else {
+            td.textContent = n;
+            const label = e('label');
+            const cb = e('input');
+            cb.type = 'checkbox';
+            cb.name = 'mod[]';
+            cb.value = String(i);
+            if (!Boolean(mod._optional)) {
+                cb.setAttribute('disabled', 'disabled');
+                cb.checked = true;
+                label.className = 'not-optional';
+            }
+            cb.checked = !Boolean(mod._optional);
+            label.append(cb);
+            td.append(label);
+            tr.append(td);
+        }
 
-        const tr = e('tr');
-        tr.append(name, flags, include);
+        if (collection) {
+            tr.className = 'submod';
+        }
+
         id('mods-body').append(tr);
     };
 
@@ -261,12 +281,12 @@ function render2(ids, data) {
         const m = getModById(i.id);
 
         if (m) {
-            renderSingleMod(m);
+            renderSingleItem(i.id, m);
             if (m._children) {
                 for (const c of m._children) {
                     const cm = getModById(c);
                     if (cm) {
-                        renderSingleMod(cm);
+                        renderSingleItem(cm.publishedfileid, cm, m);
                     } else {
                         console.error('No mod found for child ID', cm);
                     }
