@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.log('The hash has changed!');//debug
     });
 
-    const {lastUpdated} = await init();
+    const { lastUpdated } = await init();
     if (lastUpdated) {
         const sup = e('sup', 'Last updated @ ' + lastUpdated);
         id('footer').prepend(sup, e('br'));
@@ -54,7 +54,7 @@ async function init() {
             //--DBG
         } else {
             if (confirm('Redirect to the README?')) window.location.replace('https://github.com/a-sync/arma3pregen');
-            else id('loading').textContent = 'No IDs detected.';//dbg
+            else id('loading').textContent = 'No IDs detected.';
         }
     } catch (err) {
         console.error(err);
@@ -63,7 +63,7 @@ async function init() {
         id('loading').append(pre);
     }
 
-    return {lastUpdated};
+    return { lastUpdated };
 }
 
 async function parsePresetIds(presetData) {
@@ -226,54 +226,12 @@ function parseUrl() {
 
 function render2(ids, data) {
     const getModById = (id) => {
-        console.log('getModById.id', id);
         return data.find(v => {
             if (id.slice(0, 1) === '@' && id === v.id) return true;
             else if (id.slice(0, 1) === '!' && Number(id.slice(1)) === v.steam_appid) return true;
             else if (id === v.publishedfileid) return true;
             else return false;
         });
-    };
-
-    const renderSingleItem = (i, mod, collection) => {
-        const tr = e('tr');
-        const td = e('td');
-
-        let n = 'n/a';
-        if ('title' in mod) n = mod.title;
-        else if ('name' in mod) n = mod.name;
-        else if ('id' in mod) n = mod.id;
-
-        if (Boolean(mod._dlc)) n += ' (DLC)';
-        if (Boolean(mod._local)) n += ' (Local Mod)';
-
-        if (Boolean(mod._children)) {
-            const h3 = e('h3', n);
-            td.append(h3);
-            tr.append(td);
-        } else {
-            td.textContent = n;
-            const label = e('label');
-            const cb = e('input');
-            cb.type = 'checkbox';
-            cb.name = 'mod[]';
-            cb.value = String(i);
-            if (!Boolean(mod._optional)) {
-                cb.setAttribute('disabled', 'disabled');
-                cb.checked = true;
-                label.className = 'not-optional';
-            }
-            cb.checked = !Boolean(mod._optional);
-            label.append(cb);
-            td.append(label);
-            tr.append(td);
-        }
-
-        if (collection) {
-            tr.className = 'submod';
-        }
-
-        id('mods-body').append(tr);
     };
 
     console.log('RENDER2.', ids, data);
@@ -296,6 +254,76 @@ function render2(ids, data) {
             console.error('No mod found for ID', i.id);
         }
     }
+}
+
+function renderDownloadButton() {
+    console.log('dbg.renderDlBtn');//debug
+}
+
+function downloadAction() {
+    console.log('dbg.downloadAction');//debug
+}
+
+function renderSingleItem(i, mod, collection) {
+    const tr = e('tr');
+    const td = e('td');
+
+    let n = 'n/a';
+    if ('title' in mod) n = mod.title;
+    else if ('name' in mod) n = mod.name;
+    else if ('id' in mod) n = mod.id;
+
+    // if (Boolean(mod._dlc)) n += ' (DLC)';
+    // if (Boolean(mod._local)) n += ' (Local Mod)';
+
+    if (Boolean(mod._children)) {
+        const h3 = e('h3', n);
+        td.append(h3);
+        tr.append(td);
+    } else {
+        if (Boolean(mod._local)) {
+            td.textContent = n;
+        } else {
+            const a = e('a', n);
+            a.href = String(i);//#######################################################TODO legit link
+            a.addEventListener('click', event => {
+                event.preventDefault();//debug make sure MMB click works
+                console.log('dbg:name click open modal', i, mod);
+            });
+        }
+
+        const label = e('label');
+        const cb = e('input');
+        cb.type = 'checkbox';
+        cb.name = 'm[]';
+        cb.value = String(i);
+        if (!Boolean(mod._optional)) {
+            cb.setAttribute('disabled', 'disabled');
+            cb.checked = true;
+            label.className = 'not-optional';
+        }
+        cb.checked = !Boolean(mod._optional);
+        cb.addEventListener('change', event => {
+            // TODO: #################################################################### save optionals state
+            // const ls_opt = JSON.parse(window.localStorage[preset.html] || '{}');
+            // if (event.target.checked) {
+            //     ls_opt[event.target.value] = true;
+            // } else {
+            //     delete ls_opt[event.target.value];
+            // }
+            // opt_selected.textContent = String(Object.keys(ls_opt).length);
+            // window.localStorage[preset.html] = JSON.stringify(ls_opt);
+        });
+        label.append(cb);
+        td.append(label);
+        tr.append(td);
+    }
+
+    if (collection) {
+        tr.className = 'submod';
+    }
+
+    id('mods-body').append(tr);
 }
 
 // build a UI from all the presets data

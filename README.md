@@ -27,7 +27,7 @@ Append a `,` separated list of workshop collection and/or mod IDs to the end of 
 Only numbers and the optional `*` prefix/suffix is allowed.
 
 ### Optional mods
-Append or prepend a `*` to mark an ID optional.
+Append or prepend a `*` to flag an ID optional.
 
 ### Local mod IDs
 IDs starting with `@` are added to the preset as local mods.  
@@ -72,5 +72,5 @@ Open `http://localhost:80/` in a browser.
  * add backend caching (nodb)
  * shortlink support (nodb backend)
    * custom logo url
- * copy to clipboard?
+ * copy to clipboard (if it works with the launcher) ??????????
 
