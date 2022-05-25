@@ -44,7 +44,7 @@ async function init() {
             const presetData = await parsePresetIds(presetIds);
             // console.log('dbg:presetData', presetData);
 
-            render2(presetIds, presetData);//DEBUG
+            render(presetIds, presetData);//DEBUG
             id('loading').className = 'dnone';
             id('main').className = '';
 
@@ -224,7 +224,9 @@ function parseUrl() {
     return re;
 }
 
-function render2(ids, data) {
+function render(ids, data) {
+    console.log('RENDER', ids, data);
+
     const getModById = (id) => {
         return data.find(v => {
             if (id.slice(0, 1) === '@' && id === v.id) return true;
@@ -234,7 +236,6 @@ function render2(ids, data) {
         });
     };
 
-    console.log('RENDER2.', ids, data);
     for (const i of ids.ids) {
         const m = getModById(i.id);
 
@@ -267,6 +268,10 @@ function downloadAction() {
 function renderSingleItem(i, mod, collection) {
     const tr = e('tr');
     const td = e('td');
+    const label = e('label');
+    const cb = e('input');
+    let h3;
+    let sup;
 
     let n = 'n/a';
     if ('title' in mod) n = mod.title;
@@ -276,48 +281,72 @@ function renderSingleItem(i, mod, collection) {
     // if (Boolean(mod._dlc)) n += ' (DLC)';
     // if (Boolean(mod._local)) n += ' (Local Mod)';
 
-    if (Boolean(mod._children)) {
-        const h3 = e('h3', n);
-        td.append(h3);
-        tr.append(td);
+    if (Boolean(mod._local)) {
+        td.textContent = n;
+        cb.name = 'm[]';
     } else {
-        if (Boolean(mod._local)) {
-            td.textContent = n;
+        const a = e('a', n);
+
+        if (mod._dlc) {
+            a.href = 'https://store.steampowered.com/app/' + String(i).slice(1);
         } else {
-            const a = e('a', n);
-            a.href = String(i);//#######################################################TODO legit link
-            a.addEventListener('click', event => {
-                event.preventDefault();//debug make sure MMB click works
-                console.log('dbg:name click open modal', i, mod);
-            });
+            a.href = 'https://steamcommunity.com/sharedfiles/filedetails/?id=' + String(i);
         }
 
-        const label = e('label');
-        const cb = e('input');
-        cb.type = 'checkbox';
-        cb.name = 'm[]';
-        cb.value = String(i);
-        if (!Boolean(mod._optional)) {
-            cb.setAttribute('disabled', 'disabled');
-            cb.checked = true;
-            label.className = 'not-optional';
-        }
-        cb.checked = !Boolean(mod._optional);
-        cb.addEventListener('change', event => {
-            // TODO: #################################################################### save optionals state
-            // const ls_opt = JSON.parse(window.localStorage[preset.html] || '{}');
-            // if (event.target.checked) {
-            //     ls_opt[event.target.value] = true;
-            // } else {
-            //     delete ls_opt[event.target.value];
-            // }
-            // opt_selected.textContent = String(Object.keys(ls_opt).length);
-            // window.localStorage[preset.html] = JSON.stringify(ls_opt);
+        a.addEventListener('click', event => {
+            event.preventDefault();//debug make sure MMB click works
+            console.log('dbg:name click open modal', i, mod);
         });
-        label.append(cb);
-        td.append(label);
-        tr.append(td);
+
+        if (Boolean(mod._children)) {
+            h3 = e('h3');
+            h3.append(a);
+            cb.indeterminate = true;//DEBUG
+            const l = mod._children.length;
+            sup = e('sup', '(' + (Boolean(mod._optional) ? 0 : l) + '/' + l + ')');
+        } else {
+            td.append(a);
+            cb.name = 'm[]';
+        }
     }
+
+    cb.type = 'checkbox';
+    cb.value = String(i);
+
+    if (Boolean(mod._optional)) {
+        if (Boolean(mod._children)) {
+            cb.addEventListener('change', event => {
+                console.log('dbg:chkbx:collection.change');
+                //set indet.=false, and search down and set state of submods to current state
+            });
+        } else {
+
+            cb.addEventListener('change', event => {//search up for parent collection and indet.=true if classname includes submod
+                console.log('dbg:chkbx:mod.change');
+                // TODO: #################################################################### save optionals state
+                // const ls_opt = JSON.parse(window.localStorage[preset.html] || '{}');
+                // if (event.target.checked) {
+                //     ls_opt[event.target.value] = true;
+                // } else {
+                //     delete ls_opt[event.target.value];
+                // }
+                // opt_selected.textContent = String(Object.keys(ls_opt).length);
+                // window.localStorage[preset.html] = JSON.stringify(ls_opt);
+            });
+        }
+    } else {
+        cb.setAttribute('disabled', 'disabled');
+        cb.checked = true;
+        label.className = 'not-optional';
+    }
+
+    label.append(cb);
+    if (h3 && sup) {
+        td.append(h3, label, sup);
+    } else {
+        td.append(label);
+    }
+    tr.append(td);
 
     if (collection) {
         tr.className = 'submod';
@@ -327,7 +356,7 @@ function renderSingleItem(i, mod, collection) {
 }
 
 // build a UI from all the presets data
-function render(presets) {
+function render_OLD(presets) {
     console.log('# RENDER # ', presets);
     //publishedfileid,file_size,description,preview_url,time_updated
     // TODO: banned & ban reason; visibility; time_created; views; favorited; subscription; tags

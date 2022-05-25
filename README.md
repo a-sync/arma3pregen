@@ -59,7 +59,7 @@ Only numbers and the optional `*` prefix/suffix is allowed.
    * _[Arma 3 Karts](https://store.steampowered.com/app/288520) (DLC)_
 
 ## Runing locally
-_PHP ~~or Nodejs~~ runtime is required to relay backend calls to the steam API. (cors disabled)_  
+_PHP ~~or Nodejs~~ runtime is required to relay backend calls to the steam API. (CORS disabled 😔)_  
 Eg.:  
  - ~~nodejs: `node server.js`~~
  - php: `php -S 0.0.0.0:80`
