@@ -11,8 +11,7 @@ const uniqueArray = arr => [...new Set(arr)];
 document.addEventListener('DOMContentLoaded', async () => {
     // close the dialog when clicking on the backdrop
     document.addEventListener('click', event => {
-        if (!event.target.closest('.show_btn')
-            && !event.target.closest('.select_btn')
+        if (!event.target.closest('a[data-id]')
             && !event.target.closest('#dialog-header')
             && !event.target.closest('#dialog-content')) {
             id('mods').close();
@@ -211,11 +210,16 @@ function renderSingleItem(i, mod, collection, optionals) {
     else if ('id' in mod) n = mod.id;
 
     const tr = e('tr');
-    if (collection) tr.className = 'submod';
-    else tr.className = 'mod';
-
     const td = e('td');
     const cb = e('input');
+    cb.dataset.id = i;
+
+    if (collection) {
+        tr.className = 'submod';
+        cb.dataset.collectionId = collection.publishedfileid;
+    }
+    else tr.className = 'mod';
+
     let h3;
     let sup;
     if (Boolean(mod._local)) {
@@ -223,11 +227,12 @@ function renderSingleItem(i, mod, collection, optionals) {
         cb.name = 'm[]';
     } else {
         const a = e('a', n);
+        a.dataset.id = i;
         if (mod._dlc) a.href = 'https://store.steampowered.com/app/' + String(i).slice(1);
         else a.href = 'https://steamcommunity.com/sharedfiles/filedetails/?id=' + String(i);
         a.addEventListener('click', event => {
             event.preventDefault();
-            showInfoModal(i, mod, collection);
+            showInfoModal({ id: i, name: n, link: a.href, mod, collection });
         });
 
         if (Boolean(mod._children)) {
@@ -385,11 +390,17 @@ function renderDownloadButton() {
         }
     }
 
-    const unique = {req: uniqueArray(selected.req), opt: uniqueArray(selected.opt)};
+    const unique = { req: uniqueArray(selected.req), opt: uniqueArray(selected.opt) };
+    const uniqueAll = unique.req.concat(unique.opt);
+
+    const size = uniqueAll.reduce((p, c) => {
+        const m = getModById(c);
+        if (m && m.file_size) return p + m.file_size;
+        else return p;
+    }, 0);
 
     let dlBtnDescText = '';
-    const uniqueTotal = unique.req.length + unique.opt.length;
-    if (uniqueTotal > 0) {
+    if (uniqueAll.length > 0) {
         dlBtnDescText = 'Includes ';
         if (unique.req.length > 0) {
             dlBtnDescText += unique.req.length + ' required ';
@@ -400,15 +411,208 @@ function renderDownloadButton() {
         if (unique.opt.length > 0) {
             dlBtnDescText += unique.opt.length + ' optional ';
         }
-        if(uniqueTotal > 1) dlBtnDescText += 'mods.'
+        if (uniqueAll.length > 1) dlBtnDescText += 'mods.';
         else dlBtnDescText += 'mod.';
+
+        dlBtnDescText += ' (' + formatBytes(size) + ')';
     }
 
     id('dl-button-desc').textContent = dlBtnDescText;
 }
 
-function showInfoModal(i, mod, collection) {
-    console.log('dbg:showInfoModal', i, mod, collection);
+function showInfoModal(data) {
+    // console.log('dbg:showInfoModal', data);
+    const mt = id('modal-title');
+    mt.replaceChildren();
+    const dc = id('dialog-content');
+    dc.replaceChildren();
+
+    const link = e('a', '🔗');
+    link.href = data.link;
+    link.setAttribute('target', '_blank');
+    mt.append(new Text(data.name), new Text(' '), link);
+
+    if (data.mod) {
+        if (data.mod._dlc) {
+            if (data.mod.genres && data.mod.genres.length > 0) {
+                mt.append(e('br'));
+                for (const g of data.mod.genres) {
+                    mt.append(e('code', g.description));
+                }
+            }
+
+            if (data.mod.header_image) {
+                const picDiv = e('div');
+                picDiv.className = 'pic-container';
+                const img = e('img');
+                img.src = data.mod.header_image;
+                picDiv.append(img);
+                dc.append(picDiv);
+            }
+
+            if (data.mod.release_date || (data.mod.developers && data.mod.developers.length) || (data.mod.publishers && data.mod.publishers.length) || data.mod.website) {
+                const detailsTable = e('table');
+                detailsTable.className = 'details';
+                const detailsTbody = e('tbody');
+                if (data.mod.release_date) {
+                    const tr = e('tr');
+                    tr.append(e('td', 'Release Date'), e('td', data.mod.release_date.date));
+                    detailsTbody.append(tr);
+                }
+                if (data.mod.developers && data.mod.developers.length > 0) {
+                    const tr = e('tr');
+                    const s = data.mod.developers.length > 1 ? 's' : '';
+                    tr.append(e('td', 'Developer' + s), e('td', data.mod.developers.join(', ')));
+                    detailsTbody.append(tr);
+                }
+                if (data.mod.publishers && data.mod.publishers.length > 0) {
+                    const tr = e('tr');
+                    const s = data.mod.publishers.length > 1 ? 's' : '';
+                    tr.append(e('td', 'Publisher' + s), e('td', data.mod.publishers.join(', ')));
+                    detailsTbody.append(tr);
+                }
+                if (data.mod.website) {
+                    const tr = e('tr');
+                    const a = e('a', data.mod.website);
+                    a.href = data.mod.website;
+                    a.setAttribute('target', '_blank');
+                    const webTd = e('td');
+                    webTd.append(a);
+                    tr.append(e('td', 'Website'), webTd);
+                    detailsTbody.append(tr);
+                }
+                detailsTable.append(detailsTbody);
+                dc.append(detailsTable);
+            }
+
+            const desc = data.mod.detailed_description || data.mod.short_description;
+            if (desc) {
+                const descDiv = e('div');
+                descDiv.innerHTML = desc;
+                descDiv.className = 'description';
+                dc.append(descDiv);
+            }
+        } else {
+            if (data.mod.banned) {
+                const span = e('span', '🚫');
+                if (data.mod.ban_reason && data.mod.ban_reason.length > 0) {
+                    span.setAttribute('title', data.mod.ban_reason);
+                }
+                mt.append(new Text(' '), span);
+            }
+
+            if (data.mod.tags && data.mod.tags.length > 0) {
+                mt.append(e('br'));
+                for (const t of data.mod.tags) {
+                    mt.append(e('code', t.tag));
+                }
+            }
+
+            const picUrl = data.mod.preview_url || data.mod.file_url;
+            if (picUrl) {
+                const picDiv = e('div');
+                picDiv.className = 'pic-container';
+                const img = e('img');
+                img.src = picUrl;
+                picDiv.append(img);
+                dc.append(picDiv);
+            }
+
+            if (data.mod.file_size || data.mod.time_created || data.mod.time_updated || (data.mod._children || data.mod._children.length)) {
+                const detailsTable = e('table');
+                detailsTable.className = 'details';
+                const detailsTbody = e('tbody');
+                if (data.mod.file_size) {
+                    const tr = e('tr');
+                    if (data.mod._children) {
+                        let size = 0;
+                        for (const c of data.mod._children) {
+                            const m = getModById(c);
+                            if (m && m.file_size) size += m.file_size;
+                        }
+                        tr.append(e('td', 'Total Size'), e('td', formatBytes(size)));
+                    } else tr.append(e('td', 'File Size'), e('td', formatBytes(data.mod.file_size)));
+                    detailsTbody.append(tr);
+                }
+                if (data.mod._children && data.mod._children.length > 0) {
+                    const tr = e('tr');
+                    tr.append(e('td', 'Items'), e('td', data.mod._children.length));
+                    detailsTbody.append(tr);
+                }
+                if (data.mod.time_created) {
+                    const tr = e('tr');
+                    const dt = new Date(data.mod.time_created * 1000);
+                    tr.append(e('td', 'Posted'), e('td', dt.toLocaleString()));
+                    detailsTbody.append(tr);
+                }
+                if (data.mod.time_updated) {
+                    const tr = e('tr');
+                    const dt = new Date(data.mod.time_updated * 1000);
+                    tr.append(e('td', 'Updated'), e('td', dt.toLocaleString()));
+                    detailsTbody.append(tr);
+                }
+                detailsTable.append(detailsTbody);
+                dc.append(detailsTable);
+            }
+
+            if (data.mod.description) {
+                const descDiv = e('div');
+                descDiv.innerHTML = parseSteamBBCode(data.mod.description);
+                descDiv.className = 'description';
+                dc.append(descDiv);
+            }
+        }
+    }
+
+    if (id('mods').showModal === undefined) {
+        dialogPolyfill.registerDialog(id('mods'));
+    }
+    id('mods').showModal();
+}
+
+function parseSteamBBCode(source) {
+    const nl = '(\\r\\n|\\r|\\n)?';
+    const codes = [
+        ['\\[h1\\](.+?)\\[/h1\\]' + nl, '<h1>$1</h1>'],
+        ['\\[h2\\](.+?)\\[/h2\\]' + nl, '<h2>$1</h2>'],
+        ['\\[h3\\](.+?)\\[/h3\\]' + nl, '<h3>$1</h3>'],
+        ['\\[b\\](.+?)\\[/b\\]', '<b>$1</b>'],
+        ['\\[u\\](.+?)\\[/u\\]', '<u>$1</u>'],
+        ['\\[i\\](.+?)\\[/i\\]', '<i>$1</i>'],
+        ['\\[strike\\](.+?)\\[/strike\\]', '<s>$1</s>'],
+        ['\\[spoiler\\](.+?)\\[/spoiler\\]', '<span class="spoiler">$1</span>'],
+        // TODO: ['\\[noparse\\](.+?)\\[/noparse\\]', '<span class="noparse">$1</span>'],
+        ['\\[hr\\]\\[/hr\\]' + nl, '<hr>'],
+        ['\\[url\\](.+?)\\[/url\\]', '<a href="$1">$1</a>'],
+        ['\\[url=(.+?)\\](.+?)\\[/url\\]', '<a href="$1">$2</a>'],
+        ['\\[list\\]' + nl + '(.+?)\\[/list\\]' + nl, '<ul>$2</ul>'],
+        ['\\[olist\\]' + nl + '(.+?)\\[/olist\\]' + nl, '<ol>$2</ol>'],
+        ['\\[\\*\\](.+?)' + nl, '<li>$1'],
+        ['\\[\\*\\](.+?)\\[/\\*\\]' + nl, '<li>$1</li>'],
+        ['\\[quote\\]' + nl + '(.+?)\\[/quote\\]' + nl, '<blockquote>$2</blockquote>'],
+        ['\\[quote=(.+?)\\]' + nl + '(.+?)\\[/quote\\]' + nl, '<blockquote><cite>$1</cite><br>$3</blockquote>'],
+        ['\\[code\\]' + nl + '(.+?)\\[/code\\]' + nl, '<pre>$2</pre>'],
+        ['(\\r\\n|\\r|\\n)', '<br>'],
+        // TODO: youtube, steam store, steam workshop links
+    ];
+
+    return codes.reduce(
+        (source, code) => source.replace(new RegExp(code[0], 'gms'), code[1]),
+        source
+    );
+}
+
+function formatBytes(bytes, decimals) {
+    if (decimals === undefined) decimals = 2;
+    if (bytes === 0) return '0 Bytes';
+
+    const k = 1024;
+    const dm = decimals < 0 ? 0 : decimals;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 }
 
 function downloadPreset() {
@@ -418,128 +622,6 @@ function downloadPreset() {
 
 
 
-
-// build a UI from all the presets data
-function render_OLD(presets) {
-    console.log('# RENDER # ', presets);
-    //publishedfileid,file_size,description,preview_url,time_updated
-    // TODO: banned & ban reason; visibility; time_created; views; favorited; subscription; tags
-
-    for (const p of presets) {
-        const name = e('td', p.name);
-
-        const dlcReq = p.mods.required.filter(m => Boolean(m.dlc));
-        const dlcOpt = p.mods.optional.filter(m => Boolean(m.dlc));
-
-        //required col
-        const req = e('td', String(p.mods.required.length - dlcReq.length));
-        if (dlcReq.length) {
-            console.log('dlcReq');
-            const dlc = e('span', (dlcReq.length > 1 ? dlcReq.length + ' ' : '') + 'DLC');
-            dlc.title = dlcReq.map(m => m.name).join(', ');
-            req.append(new Text(' + '), dlc);
-        }
-
-        const show_btn = e('button', 'SHOW');
-        show_btn.className = 'show_btn';
-        show_btn.addEventListener('click', () => {
-            showModsModal('required', p);
-        });
-        req.append(show_btn);
-
-        // optional col
-        const opt = e('td');
-        const ls_opt_count = Object.keys(JSON.parse(window.localStorage[p.html] || '{}')).length;
-        const opt_selected = e('span', String(ls_opt_count));
-
-        opt.append(opt_selected, new Text(' / ' + String(p.mods.optional.length - dlcOpt.length)));
-        if (dlcOpt.length) {
-            console.log('dlcOpt');
-            const dlc = e('span', (dlcOpt.length > 1 ? dlcOpt.length + ' ' : '') + 'DLC');
-            dlc.title = dlcOpt.map(m => m.name).join(', ');
-            opt.append(new Text(' + '), dlc);
-        }
-
-        const select_btn = e('button', 'SELECT');
-        select_btn.className = 'select_btn';
-        select_btn.addEventListener('click', () => {
-            showModsModal('optional', p, opt_selected);
-        });
-        opt.append(select_btn);
-
-        const dl = e('td');
-        const dl_link = e('a', p.html);
-        dl_link.addEventListener('click', () => {
-            downloadPreset(p);
-        });
-        dl.append(dl_link);
-
-        const tr = e('tr');
-        tr.append(name, req, opt, dl);
-        id('presets-body').append(tr);
-    }
-}
-
-// open the mod list dialog for a preset
-function showModsModal_OLD(type, preset, opt_selected) {
-    id('modal-title').replaceChildren();
-    const dl_link = e('a', preset.html);
-    dl_link.addEventListener('click', () => {
-        downloadPreset(preset);
-    });
-    id('modal-title').append(new Text(preset.name + ' ' + type + ' mods'), e('br'), dl_link);
-
-    id('dialog-content').replaceChildren();
-    const ol = e('ol');
-    const mods = type === 'optional' ? preset.mods.optional : preset.mods.required;
-    for (const m of mods) {
-        const li = e('li');
-
-        if (type === 'optional') {
-            const cb = e('input');
-            cb.type = 'checkbox';
-            cb.name = m.name;
-            cb.value = m.link;
-            const ls_opt = JSON.parse(window.localStorage[preset.html] || '{}');
-            cb.checked = Boolean(ls_opt[m.link]);
-            // update the status of an optional mod each time the checkbox state changes
-            cb.addEventListener('change', event => {
-                const ls_opt = JSON.parse(window.localStorage[preset.html] || '{}');
-                if (event.target.checked) {
-                    ls_opt[event.target.value] = true;
-                } else {
-                    delete ls_opt[event.target.value];
-                }
-                opt_selected.textContent = String(Object.keys(ls_opt).length);
-                window.localStorage[preset.html] = JSON.stringify(ls_opt);
-            });
-            li.append(cb, new Text(' '));
-        }
-
-        if (m.link) {
-            const a = e('a', m.name);
-            a.target = '_blank';
-            a.href = m.link;
-            li.append(a);
-        } else {
-            const span = e('span', m.name);
-            li.append(span);
-        }
-
-        // highlight DLCs in the list
-        if (m.link.indexOf('store.steampowered.com/app/') !== -1) {
-            li.prepend(new Text(' ❗'));
-        }
-
-        ol.append(li);
-    }
-    id('dialog-content').append(ol);
-
-    if (id('mods').showModal === undefined) {
-        dialogPolyfill.registerDialog(id('mods'));
-    }
-    id('mods').showModal();
-}
 
 // generate an HTML file and open the `Save as` system dialog for a preset 
 function downloadPreset_OLD(preset) {
@@ -593,6 +675,7 @@ function downloadPreset_OLD(preset) {
 // TODO: drag & drop preset html to generate url
 // returns [{name,mods:{required,optional,dlc},index,files,type}]
 // load and parse each preset file and return all the info
+//TODO: detect local mods
 function parsePresetsSource(config) {
     const presets = [];
 
@@ -606,6 +689,23 @@ function parsePresetsSource(config) {
             ...additional
         }
     };
+    //TODO: sanitize name
+    // r.name ? r.name[1].replace(/\W/g, '') : ''
+    /*
+    // sort mods, 
+    //TODO: detect local mods
+        for (const m of r.mods) {
+            if (m[3] !== m[4]) {
+                console.warn('Link mismatch', m);
+            }
+
+            if (m[1] === 'Mod') {
+                
+            } else if (m[1] === 'Dlc') {
+                
+            }
+        }
+    */
 
     // marshalls all requests together so we can run them parallel
     const promises = config.reduce((p, files, index) => {

@@ -41,6 +41,9 @@ Only numbers and the optional `*` prefix/suffix is allowed.
  * FNF: `https://arma3pregen.devs.space/?FNF#1551644814,1551648858*`
    * [FNF Required Mods Collection](https://steamcommunity.com/sharedfiles/filedetails/?id=1551644814) (collection)
    * _[FNF Optional Mods Collection](https://steamcommunity.com/sharedfiles/filedetails/?id=1551648858) (collection)_
+ * FNF WW2: `https://arma3pregen.devs.space/?FNF_WW2#1769913157,2120184260*`
+   * [FNF WW2 Mod Collection](https://steamcommunity.com/sharedfiles/filedetails/?id=1769913157) (collection)
+   * _[FNF WW2 Optionals](https://steamcommunity.com/sharedfiles/filedetails/?id=2120184260) (collection)_
  * 77th JSOC: `https://arma3pregen.devs.space/?77th_JSOC#879092974*`
    * _[77th JSOC | Public Servers Mod Collection (Official)](https://steamcommunity.com/sharedfiles/filedetails/?id=879092974) (collection)_
  * C4G RHS KoTH: `https://arma3pregen.devs.space/?C4G_RHS#1290398866,*861133494,*945476727,*1180534892,*1180533757`
@@ -72,5 +75,3 @@ Open `http://localhost:80/` in a browser.
  * add backend caching (nodb)
  * shortlink support (nodb backend)
    * custom logo url
- * copy to clipboard (if it works with the launcher) ??????????
-
