@@ -20,7 +20,7 @@ header>h1,
     font-variant: small-caps;
 }
 
-.center {
+header>h1 {
     text-align: center;
 }
 
@@ -142,8 +142,16 @@ header>h1,
     }
 }
 
+#loading, #loading-text, #loading pre {
+    text-align: center;
+}
+
 #loading-text {
     margin-top: 4rem;
+}
+
+#loading pre {
+    color: firebrick;
 }
 
 .dnone {
@@ -305,13 +313,16 @@ summary:hover span {
 
 
 
+#footer {
+    text-align: center;
+}
 
-footer sup {
+#footer sup {
     font-size: 0.6rem;
 }
 
 @media (prefers-color-scheme: dark) {
-    footer a.github {
+    #footer a.github {
         fill: #c6cbd1;
     }
 }

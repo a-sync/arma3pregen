@@ -19,10 +19,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    document.addEventListener('hashchange', () => {
-        console.log('The hash has changed!');//debug
-    });
-
+    window.addEventListener('hashchange', init);
     await init();
 });
 
@@ -38,6 +35,11 @@ function getModById(id) {
 }
 
 async function init() {
+    id('main').className = 'dnone';
+    id('loading').className = '';
+    id('mods-body').replaceChildren();
+    id('dl-button').removeEventListener('click', downloadPreset);
+
     try {
         const presetIds = parseUrl();
         PRESET_NAME = presetIds.name;
@@ -48,18 +50,14 @@ async function init() {
             console.log('dbg:presetData', PRESET_DATA);
 
             render(presetIds);
-
-            id('dl-button').addEventListener('click', downloadAction);
-
-            id('loading').className = 'dnone';
-            id('main').className = '';
+            id('dl-button').addEventListener('click', downloadPreset);
         } else {
             if (confirm('Redirect to the README?')) window.location.replace('https://github.com/a-sync/arma3pregen');
             else id('loading').textContent = 'No IDs detected.';
         }
     } catch (err) {
         console.error(err);
-        id('loading').textContent = 'Something went wrong... 💩';
+        id('loading-text').textContent = 'Something went wrong... 💩';
         const pre = e('pre', err.message || err);
         id('loading').append(pre);
     }
@@ -201,6 +199,9 @@ function render(ids) {
     }
 
     renderDownloadButton();
+
+    id('loading').className = 'dnone';
+    id('main').className = '';
 }
 
 function renderSingleItem(i, mod, collection, optionals) {
@@ -410,8 +411,8 @@ function showInfoModal(i, mod, collection) {
     console.log('dbg:showInfoModal', i, mod, collection);
 }
 
-function downloadAction() {
-    console.log('dbg.downloadAction');//debug
+function downloadPreset() {
+    console.log('dbg.downloadPreset');//debug
 }
 
 
@@ -480,7 +481,7 @@ function render_OLD(presets) {
 }
 
 // open the mod list dialog for a preset
-function showModsModal(type, preset, opt_selected) {
+function showModsModal_OLD(type, preset, opt_selected) {
     id('modal-title').replaceChildren();
     const dl_link = e('a', preset.html);
     dl_link.addEventListener('click', () => {
@@ -541,7 +542,7 @@ function showModsModal(type, preset, opt_selected) {
 }
 
 // generate an HTML file and open the `Save as` system dialog for a preset 
-function downloadPreset(preset) {
+function downloadPreset_OLD(preset) {
     const logo = 'https://community.bistudio.com/wikidata/images/thumb/6/6c/Arma3LauncherIcon.png/192px-Arma3LauncherIcon.png';
     const preset_template = '<?xml version="1.0" encoding="utf-8"?><html><!--Created by https://a-sync.github.io/arma3pregen--><head><meta name="arma:Type" content="preset" /><meta name="arma:PresetName" content="{PRESET_NAME}" /><meta name="generator" content="Arma 3 Launcher - https://a-sync.github.io/arma3pregen" /><title>Arma 3</title><link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" type="text/css" /><style>body{margin:0;padding:0;color:#fff;background:#000}body,td,th{font:95%/1.3 Roboto, Segoe UI, Tahoma, Arial, Helvetica, sans-serif}td{padding:3px 30px 3px 0}h1{padding:20px 20px 0 72px;color:white;font-weight:200;font-family:segoe ui;font-size:3em;margin:0;background:transparent url(' + logo + ') 3px 15px no-repeat;background-size: 64px auto;}em{font-variant:italic;color:silver}.before-list{padding:5px 20px 10px}.mod-list{background:#222222;padding:20px}.dlc-list{background:#222222;padding:20px}.footer{padding:20px;color:gray}.whups{color:gray}a{color:#D18F21;text-decoration:underline}a:hover{color:#F1AF41;text-decoration:none}.from-steam{color:#449EBD}.from-local{color:gray}</style></head><body><h1>Arma 3 - Preset <strong>{PRESET_NAME}</strong></h1><p class="before-list"><em>Drag this file over the the Arma 3 Launcher or load it from Mods / Preset / Import.</em></p><div class="mod-list"><table>{MOD_LIST}</table></div><div class="dlc-list"><table>{DLC_LIST}</table></div><div class="footer"><span>Created by <a href="https://a-sync.github.io/arma3pregen">https://a-sync.github.io/arma3pregen</a></span></div></body></html>';
 
