@@ -1,6 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Black+Ops+One&display=swap');
 
-html, body {
+html,
+body {
     scroll-behavior: smooth;
     min-height: 100%;
 }
@@ -12,7 +13,8 @@ html, body {
     justify-content: space-between;
 }
 
-header > h1, #main > section > h2 {
+header>h1,
+#main>section>h2 {
     font-family: 'Black Ops One', Helvetica, Arial, sans-serif;
     font-weight: 400;
     font-variant: small-caps;
@@ -156,6 +158,11 @@ header > h1, #main > section > h2 {
     position: relative;
     overflow: visible;
     margin: 0 auto;
+    box-shadow: 0 0 4px 2px rgba(0, 0, 0, 0.5);
+}
+
+#dl-button:hover {
+    box-shadow: 0 0 6px 4px rgba(0, 0, 0, 0.5);
 }
 
 #dl-button-feedback {
@@ -165,11 +172,12 @@ header > h1, #main > section > h2 {
     transform: scale(1.3);
 }
 
-#main sup {
+#dl-button-desc {
+    font-size: 0.66rem;
     font-style: italic;
 }
 
-#main > section > header + table {
+#main>section>header+table {
     margin-top: 1.5rem;
 }
 
@@ -187,11 +195,13 @@ header > h1, #main > section > h2 {
     display: inline-block;
 }
 
-#mods-body tr td h3 + label {
+#mods-body tr td h3+label {
     zoom: 1.5;
     margin-right: -2px;
 }
-#mods-body tr td h3 + label + sup {
+
+#mods-body tr td h3+label+sup {
+    font-style: italic;
     float: right;
     margin-top: 2px;
 }
@@ -208,8 +218,10 @@ header > h1, #main > section > h2 {
     margin-left: -0.7rem;
 }
 
-#mods-body .not-optional,
-#mods-body .not-optional input {
+#mods-body label.not-optional,
+#mods-body label.not-optional input,
+#mods-body label.disabled,
+#mods-body label.disabled input {
     cursor: default;
 }
 
@@ -228,24 +240,14 @@ header > h1, #main > section > h2 {
     transform: translateY(2px);
 }
 
-/* .show_btn, 
-tbody tr:nth-child(2n) .show_btn {
-    background-color: orangered;
-}
 
-.select_btn,
-tbody tr:nth-child(2n) .select_btn {
-    background-color: olivedrab;
-} */
 
-#mods-title {
+
+
+#modal-title {
     font-weight: bold;
     text-align: left;
 }
-
-
-
-
 
 #dialog-header button {
     padding: 7px;
@@ -274,27 +276,29 @@ tbody tr:nth-child(2n) .select_btn {
     margin: 0 5px;
 }
 
-#dialog-content ol li input[type=checkbox] + a {
+#dialog-content ol li input[type=checkbox]+a {
     opacity: .6;
     font-style: italic;
 }
 
-#dialog-content ol li input[type=checkbox]:checked + a {
+#dialog-content ol li input[type=checkbox]:checked+a {
     opacity: 1;
     font-style: normal;
 }
 
-dialog + .backdrop {
-    background: rgba(0,0,0,.61);
+dialog+.backdrop {
+    background: rgba(0, 0, 0, .61);
     -webkit-backdrop-filter: blur(4px);
     backdrop-filter: blur(4px);
 }
 
-summary:focus, summary:hover {
+summary:focus,
+summary:hover {
     text-decoration: none;
 }
 
-summary:focus span, summary:hover span {
+summary:focus span,
+summary:hover span {
     text-decoration: underline;
 }
 

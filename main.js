@@ -33,25 +33,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
+let PRESET_NAME = 'arma3pregen';
 async function init() {
     let lastUpdated = 1;
 
     try {
         const presetIds = parseUrl();
         // console.log('dbg:presetIds', presetIds);
-        id('dl-button-filename').textContent = presetIds.name;
+        PRESET_NAME = presetIds.name;
+        id('dl-button-filename').textContent = presetIds.name;//TODO: renderbutton from PRESET_NAME
         if (presetIds.ids.length > 0) {
             const presetData = await parsePresetIds(presetIds);
             // console.log('dbg:presetData', presetData);
 
-            render(presetIds, presetData);//DEBUG
+            render(presetIds, presetData);
             id('loading').className = 'dnone';
             id('main').className = '';
-
-            //DBG
-            //id('debug').textContent = JSON.stringify(mods, null, 2);
-            //id('debug').className = '';
-            //--DBG
         } else {
             if (confirm('Redirect to the README?')) window.location.replace('https://github.com/a-sync/arma3pregen');
             else id('loading').textContent = 'No IDs detected.';
@@ -64,6 +61,40 @@ async function init() {
     }
 
     return { lastUpdated };
+}
+
+function parseUrl() {
+    const loc = window.location;
+    const re = {
+        name: 'arma3pregen',
+        ids: []
+    };
+
+    if (loc.search.length > 1) {
+        re.name = loc.search.slice(1).replaceAll(/\W/g, '');
+        if (re.name.length < 1) re.name = 'arma3pregen';
+    }
+
+    if (loc.hash.length > 1) {
+        const idsArray = loc.hash.slice(1).split(',');
+        for (const i of idsArray) {
+            const idMatch = Array.from(i.matchAll(/^\*?(!?\d+|@\w+)\*?$/g));
+
+            if (idMatch.length === 1 && idMatch[0].length === 2) {
+                const id = idMatch[0][1];
+                re.ids.push({
+                    optional: Boolean(i !== id),
+                    local: Boolean(id.slice(0, 1) === '@'),
+                    dlc: Boolean(id.slice(0, 1) === '!'),
+                    id
+                });
+            } else {
+                console.error('Skipping invalid ID in list', i);
+            }
+        }
+    }
+
+    return re;
 }
 
 async function parsePresetIds(presetData) {
@@ -84,8 +115,8 @@ async function parsePresetIds(presetData) {
             else workshopIds.push(i.id);
         }
 
-        if (i.required) optionalFlags[i.id] = false;
-        else optionalFlags[i.id] = true;
+        if (i.optional) optionalFlags[i.id] = true;
+        else optionalFlags[i.id] = false;
     }
 
     const collections = await fetch('backend/', {
@@ -190,40 +221,6 @@ async function parsePresetIds(presetData) {
     // }
 }
 
-function parseUrl() {
-    const loc = window.location;
-    const re = {
-        name: 'arma3pregen',
-        ids: []
-    };
-
-    if (loc.search.length > 1) {
-        re.name = loc.search.slice(1).replaceAll(/\W/g, '');
-        if (re.name.length < 1) re.name = 'arma3pregen';
-    }
-
-    if (loc.hash.length > 1) {
-        const idsArray = loc.hash.slice(1).split(',');
-        for (const i of idsArray) {
-            const idMatch = Array.from(i.matchAll(/^\*?(!?\d+|@\w+)\*?$/g));
-
-            if (idMatch.length === 1 && idMatch[0].length === 2) {
-                const id = idMatch[0][1];
-                re.ids.push({
-                    required: Boolean(i === id),
-                    local: Boolean(id.slice(0, 1) === '@'),
-                    dlc: Boolean(id.slice(0, 1) === '!'),
-                    id
-                });
-            } else {
-                console.error('Skipping invalid ID in list', i);
-            }
-        }
-    }
-
-    return re;
-}
-
 function render(ids, data) {
     console.log('RENDER', ids, data);
 
@@ -236,74 +233,59 @@ function render(ids, data) {
         });
     };
 
+    const optionals = JSON.parse(window.localStorage['opt_' + PRESET_NAME] || '{}');
     for (const i of ids.ids) {
         const m = getModById(i.id);
-
         if (m) {
-            renderSingleItem(i.id, m);
+            renderSingleItem(i.id, m, null, optionals);
             if (m._children) {
                 for (const c of m._children) {
                     const cm = getModById(c);
-                    if (cm) {
-                        renderSingleItem(cm.publishedfileid, cm, m);
-                    } else {
-                        console.error('No mod found for child ID', cm);
-                    }
+                    if (cm) renderSingleItem(cm.publishedfileid, cm, m, optionals);
+                    else console.error('No mod found for child ID', cm);
                 }
             }
-        } else {
-            console.error('No mod found for ID', i.id);
-        }
+        } else console.error('No mod found for ID', i.id);
+    }
+
+    const collectionTrs = document.querySelectorAll('#mods-body tr.collection');
+    for (const cTr of Array.from(collectionTrs)) {
+        updSelectedSubmodsNum(cTr);
     }
 }
 
-function renderDownloadButton() {
-    console.log('dbg.renderDlBtn');//debug
-}
-
-function downloadAction() {
-    console.log('dbg.downloadAction');//debug
-}
-
-function renderSingleItem(i, mod, collection) {
-    const tr = e('tr');
-    const td = e('td');
-    const label = e('label');
-    const cb = e('input');
-    let h3;
-    let sup;
-
+function renderSingleItem(i, mod, collection, optionals) {
     let n = 'n/a';
     if ('title' in mod) n = mod.title;
     else if ('name' in mod) n = mod.name;
     else if ('id' in mod) n = mod.id;
 
-    // if (Boolean(mod._dlc)) n += ' (DLC)';
-    // if (Boolean(mod._local)) n += ' (Local Mod)';
+    const tr = e('tr');
+    if (collection) tr.className = 'submod';
+    else tr.className = 'mod';
 
+    const td = e('td');
+    const cb = e('input');
+    let h3;
+    let sup;
     if (Boolean(mod._local)) {
         td.textContent = n;
         cb.name = 'm[]';
     } else {
         const a = e('a', n);
-
-        if (mod._dlc) {
-            a.href = 'https://store.steampowered.com/app/' + String(i).slice(1);
-        } else {
-            a.href = 'https://steamcommunity.com/sharedfiles/filedetails/?id=' + String(i);
-        }
-
+        if (mod._dlc) a.href = 'https://store.steampowered.com/app/' + String(i).slice(1);
+        else a.href = 'https://steamcommunity.com/sharedfiles/filedetails/?id=' + String(i);
         a.addEventListener('click', event => {
-            event.preventDefault();//debug make sure MMB click works
-            console.log('dbg:name click open modal', i, mod);
+            event.preventDefault();
+            showInfoModal(i, mod, collection);//DEBUG
         });
 
         if (Boolean(mod._children)) {
             h3 = e('h3');
             h3.append(a);
-            cb.indeterminate = true;//DEBUG
             const l = mod._children.length;
             sup = e('sup', '(' + (Boolean(mod._optional) ? 0 : l) + '/' + l + ')');
+            tr.className = 'collection';
         } else {
             td.append(a);
             cb.name = 'm[]';
@@ -313,47 +295,131 @@ function renderSingleItem(i, mod, collection) {
     cb.type = 'checkbox';
     cb.value = String(i);
 
+    const label = e('label');
     if (Boolean(mod._optional)) {
-        if (Boolean(mod._children)) {
-            cb.addEventListener('change', event => {
-                console.log('dbg:chkbx:collection.change');
-                //set indet.=false, and search down and set state of submods to current state
-            });
-        } else {
-
-            cb.addEventListener('change', event => {//search up for parent collection and indet.=true if classname includes submod
-                console.log('dbg:chkbx:mod.change');
-                // TODO: #################################################################### save optionals state
-                // const ls_opt = JSON.parse(window.localStorage[preset.html] || '{}');
-                // if (event.target.checked) {
-                //     ls_opt[event.target.value] = true;
-                // } else {
-                //     delete ls_opt[event.target.value];
-                // }
-                // opt_selected.textContent = String(Object.keys(ls_opt).length);
-                // window.localStorage[preset.html] = JSON.stringify(ls_opt);
-            });
+        if (collection && !Boolean(collection._optional)) {
+            cb.setAttribute('disabled', 'disabled');
+            label.className = 'disabled';
         }
+        if (optionals[cb.value]) cb.checked = true;
+
+        if (Boolean(mod._children)) cb.addEventListener('change', collectionCheckBox);
+        else cb.addEventListener('change', modCheckBox);
     } else {
         cb.setAttribute('disabled', 'disabled');
         cb.checked = true;
-        label.className = 'not-optional';
+        label.className = 'not-optional disabled';
     }
 
     label.append(cb);
-    if (h3 && sup) {
-        td.append(h3, label, sup);
-    } else {
-        td.append(label);
-    }
+    if (h3 && sup) td.append(h3, label, sup);
+    else td.append(label);
     tr.append(td);
-
-    if (collection) {
-        tr.className = 'submod';
-    }
 
     id('mods-body').append(tr);
 }
+
+function updSelectedSubmodsNum(collectionTr) {
+    let total = 0;
+    let selected = 0;
+    let nextEl = collectionTr.nextElementSibling;
+    while (nextEl) {
+        if (!nextEl.classList.contains('submod')) break;
+        total++;
+        const modInput = nextEl.querySelector('input[type=checkbox]');
+        if (modInput && modInput.checked) selected++;
+        nextEl = nextEl.nextElementSibling;
+    }
+    const collectionSel = collectionTr.querySelector('sup');
+    if (collectionSel) collectionSel.textContent = selected + '/' + total;
+    const collectionInput = collectionTr.querySelector('input[type=checkbox]');
+    if (selected > 0 && selected < total) collectionInput.indeterminate = true;
+    else collectionInput.indeterminate = false;
+    return { total, selected };
+}
+
+function collectionCheckBox(event) {
+    const opt = JSON.parse(window.localStorage['opt_' + PRESET_NAME] || '{}');
+    if (event.target.checked) opt[event.target.value] = true;
+    else delete opt[event.target.value];
+
+    const tr = event.target.parentNode.parentNode.parentNode;
+    let nextEl = tr.nextElementSibling;
+    while (nextEl) {
+        if (!nextEl.classList.contains('submod')) break;
+        const modInput = nextEl.querySelector('input[type=checkbox]');
+        if (modInput && !modInput.disabled) {
+            modInput.checked = event.target.checked;//TODO: replicate changes to all other item instance checkboxes
+            if (modInput.checked) opt[modInput.value] = modInput.checked;
+            else delete opt[modInput.value];
+        }
+        nextEl = nextEl.nextElementSibling;
+    }
+
+    updSelectedSubmodsNum(tr);
+
+    window.localStorage['opt_' + PRESET_NAME] = JSON.stringify(opt);
+}
+
+function modCheckBox(event) {
+    const opt = JSON.parse(window.localStorage['opt_' + PRESET_NAME] || '{}');
+    if (event.target.checked) opt[event.target.value] = true;
+    else delete opt[event.target.value];
+
+    const tr = event.target.parentNode.parentNode.parentNode;
+    if (tr.classList.contains('submod')) {
+        let prevEl = tr.previousElementSibling;
+        while (prevEl) {
+            if (prevEl.classList.contains('collection')) break;
+            prevEl = prevEl.previousElementSibling;
+        }
+        if (prevEl) {
+            const collectionInput = prevEl.querySelector('input[type=checkbox]');
+            if (collectionInput) {
+                let allTrue = true;
+                let nextEl = prevEl.nextElementSibling;
+                while (nextEl) {
+                    if (!nextEl.classList.contains('submod')) break;
+
+                    const modInput = nextEl.querySelector('input[type=checkbox]');
+                    if (modInput) {
+                        console.log('modInput.checked', modInput.checked);
+                        if (modInput.checked === false) {
+                            allTrue = false;
+                            break;
+                        }
+                    }
+
+                    nextEl = nextEl.nextElementSibling;
+                }
+                collectionInput.checked = allTrue;
+                if (collectionInput.checked) opt[collectionInput.value] = true;
+                else delete opt[collectionInput.value];
+            }
+
+            updSelectedSubmodsNum(prevEl);
+        }
+    }
+    // TODO: replicate changes to all other item instance checkboxes
+
+    window.localStorage['opt_' + PRESET_NAME] = JSON.stringify(opt);
+}
+
+function renderDownloadButton() {
+    console.log('dbg.renderDlBtn');//debug
+}
+
+function showInfoModal(i, mod, collection) {
+    console.log('dbg:showInfoModal', i, mod, collection);
+}
+
+function downloadAction() {
+    console.log('dbg.downloadAction');//debug
+}
+
+
+
+
 
 // build a UI from all the presets data
 function render_OLD(presets) {
@@ -364,10 +430,8 @@ function render_OLD(presets) {
     for (const p of presets) {
         const name = e('td', p.name);
 
-        console.log('p.mods', p.mods);//debug
         const dlcReq = p.mods.required.filter(m => Boolean(m.dlc));
         const dlcOpt = p.mods.optional.filter(m => Boolean(m.dlc));
-        console.log('dlcReq, dlcOpt', dlcReq, dlcOpt);//debug
 
         //required col
         const req = e('td', String(p.mods.required.length - dlcReq.length));
@@ -420,12 +484,12 @@ function render_OLD(presets) {
 
 // open the mod list dialog for a preset
 function showModsModal(type, preset, opt_selected) {
-    id('mods-title').replaceChildren();
+    id('modal-title').replaceChildren();
     const dl_link = e('a', preset.html);
     dl_link.addEventListener('click', () => {
         downloadPreset(preset);
     });
-    id('mods-title').append(new Text(preset.name + ' ' + type + ' mods'), e('br'), dl_link);
+    id('modal-title').append(new Text(preset.name + ' ' + type + ' mods'), e('br'), dl_link);
 
     id('dialog-content').replaceChildren();
     const ol = e('ol');
