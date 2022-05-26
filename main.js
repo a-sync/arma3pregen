@@ -5,6 +5,7 @@ const e = (type, text, options) => {
     if (text !== undefined) re.textContent = text;
     return re;
 }
+const uniqueArray = arr => [...new Set(arr)];
 
 // main
 document.addEventListener('DOMContentLoaded', async () => {
@@ -22,31 +23,34 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.log('The hash has changed!');//debug
     });
 
-    const { lastUpdated } = await init();
-    if (lastUpdated) {
-        const sup = e('sup', 'Last updated @ ' + lastUpdated);
-        id('footer').prepend(sup, e('br'));
-
-        id('dl-button').addEventListener('click', event => {
-            console.log('download! what?');//debug
-        });
-    }
+    await init();
 });
 
 let PRESET_NAME = 'arma3pregen';
-async function init() {
-    let lastUpdated = 1;
+let PRESET_DATA = [];
+function getModById(id) {
+    return PRESET_DATA.find(v => {
+        if (id.slice(0, 1) === '@' && id === v.id) return true;
+        else if (id.slice(0, 1) === '!' && Number(id.slice(1)) === v.steam_appid) return true;
+        else if (id === v.publishedfileid) return true;
+        else return false;
+    });
+}
 
+async function init() {
     try {
         const presetIds = parseUrl();
-        // console.log('dbg:presetIds', presetIds);
         PRESET_NAME = presetIds.name;
-        id('dl-button-filename').textContent = presetIds.name;//TODO: renderbutton from PRESET_NAME
-        if (presetIds.ids.length > 0) {
-            const presetData = await parsePresetIds(presetIds);
-            // console.log('dbg:presetData', presetData);
+        console.log('dbg:presetIds', presetIds);
 
-            render(presetIds, presetData);
+        if (presetIds.ids.length > 0) {
+            PRESET_DATA = await parsePresetIds(presetIds);
+            console.log('dbg:presetData', PRESET_DATA);
+
+            render(presetIds);
+
+            id('dl-button').addEventListener('click', downloadAction);
+
             id('loading').className = 'dnone';
             id('main').className = '';
         } else {
@@ -59,8 +63,6 @@ async function init() {
         const pre = e('pre', err.message || err);
         id('loading').append(pre);
     }
-
-    return { lastUpdated };
 }
 
 function parseUrl() {
@@ -97,14 +99,14 @@ function parseUrl() {
     return re;
 }
 
-async function parsePresetIds(presetData) {
+async function parsePresetIds(presetIds) {
     const modIds = [];
     const collectionChildren = {};
     const modDetails = [];
     const workshopIds = [];
     const dlcAppIds = [];
     const optionalFlags = {};
-    for (const i of presetData.ids) {
+    for (const i of presetIds.ids) {
         if (i.local) {
             modDetails.push({
                 id: i.id,
@@ -174,66 +176,11 @@ async function parsePresetIds(presetData) {
 
         return m;
     });
-
-    //DEBUG: hax to convert format to OLD version
-    ////###############################################
-
-
-    // const addMod = (newMod, required, local) => {
-    //     let id = '';
-    //     let name = '';
-    //     let link = '';
-
-    //     if (Boolean(newMod._dlc)) {
-    //         id = newMod.steam_appid;
-    //         name = newMod.name;
-    //         link = 'https://store.steampowered.com/app/' + id;
-    //     } else if (local) {
-    //         id = newMod.name;
-    //         name = id;
-    //     } else {
-    //         id = newMod.publishedfileid;
-    //         name = newMod.title;
-    //         link = 'http://steamcommunity.com/sharedfiles/filedetails/?id=' + id;
-    //     }
-    //     preset.mods[required ? 'required' : 'optional'].push({ id, name, link, dlc: Boolean(newMod._dlc) });
-    // };
-
-    // for (const mData of presetData.ids) {
-    //     if (mData.local) {
-    //         addMod({ name: mData.id }, mData.required, mData.local);
-    //     } else {
-    //         if (mData.dlc) {
-    //             const mod = modDetails.find(m => mData.id === m._dlc);
-    //             if (mod) addMod(mod, mData.required);
-    //         } else {
-    //             const mod = modDetails.find(m => mData.id === m.publishedfileid);
-    //             if (mod) {
-    //                 if (mod._children) {
-    //                     for (const mc of mod._children) {
-    //                         const childMod = modDetails.find(m => mc === m.publishedfileid);
-    //                         if (childMod) addMod(childMod, mData.required);
-    //                     }
-    //                 } else addMod(mod, mData.required);
-    //             }
-    //         }
-    //     }
-    // }
 }
 
-function render(ids, data) {
-    console.log('RENDER', ids, data);
-
-    const getModById = (id) => {
-        return data.find(v => {
-            if (id.slice(0, 1) === '@' && id === v.id) return true;
-            else if (id.slice(0, 1) === '!' && Number(id.slice(1)) === v.steam_appid) return true;
-            else if (id === v.publishedfileid) return true;
-            else return false;
-        });
-    };
-
+function render(ids) {
     const optionals = JSON.parse(window.localStorage['opt_' + PRESET_NAME] || '{}');
+
     for (const i of ids.ids) {
         const m = getModById(i.id);
         if (m) {
@@ -252,6 +199,8 @@ function render(ids, data) {
     for (const cTr of Array.from(collectionTrs)) {
         updSelectedSubmodsNum(cTr);
     }
+
+    renderDownloadButton();
 }
 
 function renderSingleItem(i, mod, collection, optionals) {
@@ -277,7 +226,7 @@ function renderSingleItem(i, mod, collection, optionals) {
         else a.href = 'https://steamcommunity.com/sharedfiles/filedetails/?id=' + String(i);
         a.addEventListener('click', event => {
             event.preventDefault();
-            showInfoModal(i, mod, collection);//DEBUG
+            showInfoModal(i, mod, collection);
         });
 
         if (Boolean(mod._children)) {
@@ -303,8 +252,8 @@ function renderSingleItem(i, mod, collection, optionals) {
         }
         if (optionals[cb.value]) cb.checked = true;
 
-        if (Boolean(mod._children)) cb.addEventListener('change', collectionCheckBox);
-        else cb.addEventListener('change', modCheckBox);
+        if (Boolean(mod._children)) cb.addEventListener('change', collectionCheckbox);
+        else cb.addEventListener('change', modCheckbox);
     } else {
         cb.setAttribute('disabled', 'disabled');
         cb.checked = true;
@@ -338,7 +287,21 @@ function updSelectedSubmodsNum(collectionTr) {
     return { total, selected };
 }
 
-function collectionCheckBox(event) {
+function replicateCheckboxState(cb) {
+    const cbs = document.querySelectorAll("#mods-body tr td label input[name='m[]']");
+    for (const c of Array.from(cbs)) {
+        if (c.value === cb.value && c.checked !== cb.checked) {
+            c.checked = cb.checked;
+            const ev = {
+                _replica: true,
+                target: c
+            };
+            modCheckbox(ev);
+        }
+    }
+}
+
+function collectionCheckbox(event) {
     const opt = JSON.parse(window.localStorage['opt_' + PRESET_NAME] || '{}');
     if (event.target.checked) opt[event.target.value] = true;
     else delete opt[event.target.value];
@@ -349,19 +312,22 @@ function collectionCheckBox(event) {
         if (!nextEl.classList.contains('submod')) break;
         const modInput = nextEl.querySelector('input[type=checkbox]');
         if (modInput && !modInput.disabled) {
-            modInput.checked = event.target.checked;//TODO: replicate changes to all other item instance checkboxes
+            const changed = Boolean(modInput.checked !== event.target.checked);
+            modInput.checked = event.target.checked;
             if (modInput.checked) opt[modInput.value] = modInput.checked;
             else delete opt[modInput.value];
+            if (changed) replicateCheckboxState(modInput);
         }
         nextEl = nextEl.nextElementSibling;
     }
 
     updSelectedSubmodsNum(tr);
+    renderDownloadButton();
 
     window.localStorage['opt_' + PRESET_NAME] = JSON.stringify(opt);
 }
 
-function modCheckBox(event) {
+function modCheckbox(event) {
     const opt = JSON.parse(window.localStorage['opt_' + PRESET_NAME] || '{}');
     if (event.target.checked) opt[event.target.value] = true;
     else delete opt[event.target.value];
@@ -380,33 +346,64 @@ function modCheckBox(event) {
                 let nextEl = prevEl.nextElementSibling;
                 while (nextEl) {
                     if (!nextEl.classList.contains('submod')) break;
-
                     const modInput = nextEl.querySelector('input[type=checkbox]');
                     if (modInput) {
-                        console.log('modInput.checked', modInput.checked);
                         if (modInput.checked === false) {
                             allTrue = false;
                             break;
                         }
                     }
-
                     nextEl = nextEl.nextElementSibling;
                 }
                 collectionInput.checked = allTrue;
                 if (collectionInput.checked) opt[collectionInput.value] = true;
                 else delete opt[collectionInput.value];
             }
-
             updSelectedSubmodsNum(prevEl);
         }
     }
-    // TODO: replicate changes to all other item instance checkboxes
+
+    if (!Boolean(event._replica)) {
+        replicateCheckboxState(event.target);
+        renderDownloadButton();
+    }
 
     window.localStorage['opt_' + PRESET_NAME] = JSON.stringify(opt);
 }
 
 function renderDownloadButton() {
-    console.log('dbg.renderDlBtn');//debug
+    id('dl-button-filename').textContent = PRESET_NAME;
+
+    const selected = { req: [], opt: [] };
+    const cbs = document.querySelectorAll("#mods-body tr td label input[name='m[]']");
+    for (const c of Array.from(cbs)) {
+        if (c.checked) {
+            const label = c.parentElement;
+            if (label.classList.contains('not-optional')) selected.req.push(c.value);
+            else selected.opt.push(c.value);
+        }
+    }
+
+    const unique = {req: uniqueArray(selected.req), opt: uniqueArray(selected.opt)};
+
+    let dlBtnDescText = '';
+    const uniqueTotal = unique.req.length + unique.opt.length;
+    if (uniqueTotal > 0) {
+        dlBtnDescText = 'Includes ';
+        if (unique.req.length > 0) {
+            dlBtnDescText += unique.req.length + ' required ';
+            if (unique.opt.length > 0) {
+                dlBtnDescText += 'and '
+            }
+        }
+        if (unique.opt.length > 0) {
+            dlBtnDescText += unique.opt.length + ' optional ';
+        }
+        if(uniqueTotal > 1) dlBtnDescText += 'mods.'
+        else dlBtnDescText += 'mod.';
+    }
+
+    id('dl-button-desc').textContent = dlBtnDescText;
 }
 
 function showInfoModal(i, mod, collection) {
