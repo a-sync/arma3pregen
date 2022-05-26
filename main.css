@@ -343,8 +343,18 @@ header>h1 {
     padding: 0px 8px;
 }
 
+#dialog-content .description span.spoiler * {
+    color: #000;
+    background-color: #000;
+}
+
 #dialog-content .description span.spoiler:hover {
     color: #fff;
+}
+
+#dialog-content .description span.spoiler:hover * {
+    color: inherit;
+    background-color: inherit;
 }
 
 #dialog-content .description ul,
