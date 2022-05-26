@@ -75,3 +75,4 @@ Open `http://localhost:80/` in a browser.
  * add backend caching (nodb)
  * shortlink support (nodb backend)
    * custom logo url
+ * preset file parser

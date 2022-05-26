@@ -349,7 +349,7 @@ header>h1 {
 
 #dialog-content .description ul,
 #dialog-content .description ol {
-    margin: 0 5px;
+    margin: 5px;
 }
 
 dialog+.backdrop {

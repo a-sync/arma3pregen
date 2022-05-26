@@ -9,6 +9,13 @@ const uniqueArray = arr => [...new Set(arr)];
 
 // main
 document.addEventListener('DOMContentLoaded', async () => {
+    if (id('mods').showModal === undefined) {
+        document.querySelector('head').insertAdjacentHTML('afterbegin', [
+            '\<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/dialog-polyfill@latest/dist/dialog-polyfill.min.css"\>',
+            '\<script src="https://cdn.jsdelivr.net/npm/dialog-polyfill@latest/dist/dialog-polyfill.min.js"\>\<\/script\>'
+        ].join(''));
+    }
+
     // close the dialog when clicking on the backdrop
     document.addEventListener('click', event => {
         if (!event.target.closest('a[data-id]')
@@ -33,6 +40,7 @@ function getModById(id) {
     });
 }
 
+const DBG = 1;
 async function init() {
     id('main').className = 'dnone';
     id('loading').className = '';
@@ -42,11 +50,11 @@ async function init() {
     try {
         const presetIds = parseUrl();
         PRESET_NAME = presetIds.name;
-        console.log('dbg:presetIds', presetIds);
+        if (DBG) console.log('dbg:presetIds', presetIds);
 
         if (presetIds.ids.length > 0) {
             PRESET_DATA = await parsePresetIds(presetIds);
-            console.log('dbg:presetData', PRESET_DATA);
+            if (DBG) console.log('dbg:presetData', PRESET_DATA);
 
             render(presetIds);
             id('dl-button').addEventListener('click', downloadPreset);
@@ -70,8 +78,8 @@ function parseUrl() {
     };
 
     if (loc.search.length > 1) {
-        re.name = loc.search.slice(1).replaceAll(/\W/g, '');
-        if (re.name.length < 1) re.name = 'arma3pregen';
+        const pname = loc.search.slice(1).replaceAll(/\W/g, '');
+        if (pname) re.name = pname;
     }
 
     if (loc.hash.length > 1) {
@@ -97,12 +105,9 @@ function parseUrl() {
 }
 
 async function parsePresetIds(presetIds) {
-    const modIds = [];
-    const collectionChildren = {};
     const modDetails = [];
     const workshopIds = [];
     const dlcAppIds = [];
-    const optionalFlags = {};
     for (const i of presetIds.ids) {
         if (i.local) {
             modDetails.push({
@@ -113,9 +118,6 @@ async function parsePresetIds(presetIds) {
             if (i.dlc) dlcAppIds.push(i.id.slice(1));
             else workshopIds.push(i.id);
         }
-
-        if (i.optional) optionalFlags[i.id] = true;
-        else optionalFlags[i.id] = false;
     }
 
     const collections = await fetch('backend/', {
@@ -124,15 +126,12 @@ async function parsePresetIds(presetIds) {
         body: JSON.stringify({ api: 'collection', payload: workshopIds })
     }).then(res => res.json());
 
+    const modIds = [];
+    const collectionChildren = {};
     if (collections.response.resultcount > 0) {
         for (const cd of collections.response.collectiondetails) {
             if (cd.result === 1 && cd.children && cd.children.length > 0) {
                 collectionChildren[cd.publishedfileid] = cd.children.map(cdc => {
-                    if (optionalFlags[cdc.publishedfileid] === undefined) {
-                        //TODO: or if collection id comes after the mod id or missing in the workshopId list
-                        //if missing, the latter collection state is inherited
-                        optionalFlags[cdc.publishedfileid] = Boolean(optionalFlags[cd.publishedfileid]);
-                    }
                     modIds.push(cdc.publishedfileid);
                     return cdc.publishedfileid;
                 });
@@ -149,7 +148,7 @@ async function parsePresetIds(presetIds) {
     if (mods.response.resultcount > 0) {
         for (const f of mods.response.publishedfiledetails) {
             if (collectionChildren[f.publishedfileid]) f._children = collectionChildren[f.publishedfileid];
-            modDetails.push(f);
+            if (f.result && f.result !== 9) modDetails.push(f);
         }
     }
 
@@ -163,6 +162,18 @@ async function parsePresetIds(presetIds) {
         for (const d of dlcs.response) {
             d._dlc = '!' + d.steam_appid;
             modDetails.push(d);
+        }
+    }
+
+    const optionalFlags = {};
+    for (const i of presetIds.ids) {
+        const opt = Boolean(i.optional);
+        optionalFlags[i.id] = opt;
+
+        if (collectionChildren[i.id]) {
+            for (const c of collectionChildren[i.id]) {
+                optionalFlags[c] = opt;
+            }
         }
     }
 
@@ -401,7 +412,7 @@ function renderDownloadButton() {
 
     let dlBtnDescText = '';
     if (uniqueAll.length > 0) {
-        dlBtnDescText = 'Includes ';
+        dlBtnDescText = 'Contains ';
         if (unique.req.length > 0) {
             dlBtnDescText += unique.req.length + ' required ';
             if (unique.opt.length > 0) {
@@ -414,14 +425,14 @@ function renderDownloadButton() {
         if (uniqueAll.length > 1) dlBtnDescText += 'mods.';
         else dlBtnDescText += 'mod.';
 
-        dlBtnDescText += ' (' + formatBytes(size) + ')';
+        if (size) dlBtnDescText += ' (' + formatBytes(size) + ')';
     }
 
     id('dl-button-desc').textContent = dlBtnDescText;
 }
 
 function showInfoModal(data) {
-    // console.log('dbg:showInfoModal', data);
+    if (DBG) console.log('dbg:showInfoModal', data);
     const mt = id('modal-title');
     mt.replaceChildren();
     const dc = id('dialog-content');
@@ -570,8 +581,9 @@ function showInfoModal(data) {
     id('mods').showModal();
 }
 
+// https://steamcommunity.com/comment/ForumTopic/formattinghelp
 function parseSteamBBCode(source) {
-    const nl = '(\\r\\n|\\r|\\n)?';
+    const nl = '(\\r\\n|\\r|\\n)?'; // Note: trimming group for superfluous line breaks
     const codes = [
         ['\\[h1\\](.+?)\\[/h1\\]' + nl, '<h1>$1</h1>'],
         ['\\[h2\\](.+?)\\[/h2\\]' + nl, '<h2>$1</h2>'],
@@ -581,10 +593,11 @@ function parseSteamBBCode(source) {
         ['\\[i\\](.+?)\\[/i\\]', '<i>$1</i>'],
         ['\\[strike\\](.+?)\\[/strike\\]', '<s>$1</s>'],
         ['\\[spoiler\\](.+?)\\[/spoiler\\]', '<span class="spoiler">$1</span>'],
-        // TODO: ['\\[noparse\\](.+?)\\[/noparse\\]', '<span class="noparse">$1</span>'],
+        ['\\[noparse\\](.+?)\\[/noparse\\]', '<pre class="noparse">$1</pre>'],// TODO
+        ['\\[hr\\]' + nl, '<hr>'],
         ['\\[hr\\]\\[/hr\\]' + nl, '<hr>'],
-        ['\\[url\\](.+?)\\[/url\\]', '<a href="$1">$1</a>'],
-        ['\\[url=(.+?)\\](.+?)\\[/url\\]', '<a href="$1">$2</a>'],
+        ['\\[url\\](.+?)\\[/url\\]', '<a target="_blank" href="$1">$1</a>'],
+        ['\\[url=(.+?)\\](.+?)\\[/url\\]', '<a target="_blank" href="$1">$2</a>'],
         ['\\[list\\]' + nl + '(.+?)\\[/list\\]' + nl, '<ul>$2</ul>'],
         ['\\[olist\\]' + nl + '(.+?)\\[/olist\\]' + nl, '<ol>$2</ol>'],
         ['\\[\\*\\](.+?)' + nl, '<li>$1'],
@@ -593,11 +606,14 @@ function parseSteamBBCode(source) {
         ['\\[quote=(.+?)\\]' + nl + '(.+?)\\[/quote\\]' + nl, '<blockquote><cite>$1</cite><br>$3</blockquote>'],
         ['\\[code\\]' + nl + '(.+?)\\[/code\\]' + nl, '<pre>$2</pre>'],
         ['(\\r\\n|\\r|\\n)', '<br>'],
-        // TODO: youtube, steam store, steam workshop links
+        ['(https\\:\\/\\/store\\.steampowered\\.com\\/app\\/\\d+\\/?)', '<a target="_blank" href="$1">$1</a>'],
+        ['(https\\:\\/\\/steamcommunity\\.com\\/sharedfiles\\/filedetails\\/\\?id\\=\\d+)', '<a target="_blank" href="$1">$1</a>'],
+        ['(?:youtube\\.com\\/(?:[^\\/]+\\/.+\\/|(?:v|e(?:mbed)?)\\/|.*[?&]v=)|youtu\\.be\\/)([^"&?\\/\\s]{11})', '<a target="_blank" href="$1">$1</a>']
+        // TODO: preview cards for youtube, steam store and steam workshop
     ];
 
     return codes.reduce(
-        (source, code) => source.replace(new RegExp(code[0], 'gms'), code[1]),
+        (src, code) => src.replace(new RegExp(code[0], 'gms'), code[1]),
         source
     );
 }
@@ -615,154 +631,85 @@ function formatBytes(bytes, decimals) {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 }
 
+const PRESET_LOGO = 'https://community.bistudio.com/wikidata/images/thumb/6/6c/Arma3LauncherIcon.png/192px-Arma3LauncherIcon.png';
+const PRESET_TEMPLATE = '<?xml version="1.0" encoding="utf-8"?><html><!--Created by https://a-sync.github.io/arma3pregen--><head><meta name="arma:Type" content="preset" /><meta name="arma:PresetName" content="{PRESET_NAME}" /><meta name="generator" content="Arma 3 Launcher - https://a-sync.github.io/arma3pregen" /><title>Arma 3 - Preset {PRESET_NAME}</title><link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" type="text/css" /><style>body{margin:0;padding:0;color:#fff;background:#000}body,td,th{font:95%/1.3 Roboto, Segoe UI, Tahoma, Arial, Helvetica, sans-serif}td{padding:3px 30px 3px 0}h1{padding:20px 20px 0 72px;color:white;font-weight:200;font-family:segoe ui;font-size:3em;margin:0;background:transparent url(' + PRESET_LOGO + ') 3px 15px no-repeat;background-size: 64px auto;}em{font-variant:italic;color:silver}.before-list{padding:5px 20px 10px}.mod-list{background:#222222;padding:20px}.dlc-list{background:#222222;padding:20px}.footer{padding:20px;color:gray}.whups{color:gray}a{color:#D18F21;text-decoration:underline}a:hover{color:#F1AF41;text-decoration:none}.from-steam{color:#449EBD}.from-local{color:gray}</style></head><body><h1>Arma 3 - Preset <strong>{PRESET_NAME}</strong></h1><p class="before-list"><em>Drag this file over the the Arma 3 Launcher or load it from Mods / Preset / Import.</em></p><div class="mod-list"><table>{MOD_LIST}</table></div><div class="dlc-list"><table>{DLC_LIST}</table></div><div class="footer"><span>Created by <a href="https://a-sync.github.io/arma3pregen">https://a-sync.github.io/arma3pregen</a></span></div></body></html>';
+
 function downloadPreset() {
-    console.log('dbg.downloadPreset');//debug
-}
-
-
-
-
-
-// generate an HTML file and open the `Save as` system dialog for a preset 
-function downloadPreset_OLD(preset) {
-    const logo = 'https://community.bistudio.com/wikidata/images/thumb/6/6c/Arma3LauncherIcon.png/192px-Arma3LauncherIcon.png';
-    const preset_template = '<?xml version="1.0" encoding="utf-8"?><html><!--Created by https://a-sync.github.io/arma3pregen--><head><meta name="arma:Type" content="preset" /><meta name="arma:PresetName" content="{PRESET_NAME}" /><meta name="generator" content="Arma 3 Launcher - https://a-sync.github.io/arma3pregen" /><title>Arma 3</title><link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" type="text/css" /><style>body{margin:0;padding:0;color:#fff;background:#000}body,td,th{font:95%/1.3 Roboto, Segoe UI, Tahoma, Arial, Helvetica, sans-serif}td{padding:3px 30px 3px 0}h1{padding:20px 20px 0 72px;color:white;font-weight:200;font-family:segoe ui;font-size:3em;margin:0;background:transparent url(' + logo + ') 3px 15px no-repeat;background-size: 64px auto;}em{font-variant:italic;color:silver}.before-list{padding:5px 20px 10px}.mod-list{background:#222222;padding:20px}.dlc-list{background:#222222;padding:20px}.footer{padding:20px;color:gray}.whups{color:gray}a{color:#D18F21;text-decoration:underline}a:hover{color:#F1AF41;text-decoration:none}.from-steam{color:#449EBD}.from-local{color:gray}</style></head><body><h1>Arma 3 - Preset <strong>{PRESET_NAME}</strong></h1><p class="before-list"><em>Drag this file over the the Arma 3 Launcher or load it from Mods / Preset / Import.</em></p><div class="mod-list"><table>{MOD_LIST}</table></div><div class="dlc-list"><table>{DLC_LIST}</table></div><div class="footer"><span>Created by <a href="https://a-sync.github.io/arma3pregen">https://a-sync.github.io/arma3pregen</a></span></div></body></html>';
-
-    // combine the required mods with the selected optionals
-    const mods = [].concat(preset.mods.required);
-    const ls_opt = JSON.parse(window.localStorage[preset.html] || '{}');
-    for (const om of preset.mods.optional) {
-        if (ls_opt[om.link] !== undefined) {
-            mods.push(om);
+    const mods = new Set();
+    const cbs = document.querySelectorAll("#mods-body tr td label input[name='m[]']");
+    for (const c of Array.from(cbs)) {
+        if (c.checked) {
+            mods.add(c.value);
         }
     }
 
-    const modcontainers = mods.map(m => {
-        if (Boolean(m.dlc)) return '';
+    const modContainers = [];
+    const dlcContainers = [];
 
-        let from = 'local">Local';
-        let local = '';
-        let link = '';
-
-        if (m.link === '') {
-            local = '<span class="whups" data-type="Link" data-meta="local:' + m.id + '|' + m.id + '|" />';
-        } else {
-            from = 'steam">Steam';
-            link = '<a href="' + m.link + '" data-type="Link">' + m.link + '</a>';
+    for (const mId of mods) {
+        const mod = getModById(mId);
+        if (mod) {
+            if (Boolean(mod._dlc)) {
+                const link = 'https://store.steampowered.com/app/' + mod.steam_appid || mod._dlc.slice(1);
+                dlcContainers.push('<tr data-type="DlcContainer"><td data-type="DisplayName">' + mod.name + '</td><td><a href="' + link + '" data-type="Link">' + link + '</a></td></tr>');
+            } else if (Boolean(mod._local)) {
+                modContainers.push('<tr data-type="ModContainer"><td data-type="DisplayName">' + mod.id + '</td><td><span class="from-local">Local</span></td><td><span class="whups" data-type="Link" data-meta="local:' + mod.id + '|' + mod.id + '|" /></td></tr>');
+            } else {
+                const link = 'http://steamcommunity.com/sharedfiles/filedetails/?id=' + mod.publishedfileid;
+                modContainers.push('<tr data-type="ModContainer"><td data-type="DisplayName">' + mod.title + '</td><td><span class="from-steam">Steam</span></td><td><a href="' + link + '" data-type="Link">' + link + '</a></td></tr>');
+            }
         }
+    }
 
-        return '<tr data-type="ModContainer"><td data-type="DisplayName">' + m.name + '</td><td><span class="from-' + from + '</span></td><td>' + local + link + '</td></tr>';
-        // // TODO: local
-        // // http://steamcommunity.com/sharedfiles/filedetails/?id=
-        // return '<tr data-type="ModContainer"><td data-type="DisplayName">' + m.name + '</td><td><span class="from-steam">Steam</span></td><td><a href="' + m.link + '" data-type="Link">' + m.link + '</a></td></tr>';
-    });
-
-    const dlccontainers = mods.filter(m => Boolean(m.dlc)).map(m => '<tr data-type="DlcContainer"><td data-type="DisplayName">' + m.name + '</td><td><a href="' + m.link + '" data-type="Link">' + m.link + '</a></td></tr>');
-
-    const source = preset_template
-        .replaceAll('{PRESET_NAME}', preset.name)
-        .replace('{MOD_LIST}', modcontainers.join(''))
-        .replace('{DLC_LIST}', dlccontainers.join(''));
+    const source = PRESET_TEMPLATE
+        .replaceAll('{PRESET_NAME}', PRESET_NAME)
+        .replace('{MOD_LIST}', modContainers.join(''))
+        .replace('{DLC_LIST}', dlcContainers.join(''));
     const element = document.createElement('a');
     element.href = 'data:text/html;charset=utf-8,' + encodeURIComponent(source);
-    element.download = preset.html;
+    element.download = PRESET_NAME + '.html';
     element.style.display = 'none';
     document.body.append(element);
     element.click();
     element.remove();
 }
 
-// TODO: drag & drop preset html to generate url
-// returns [{name,mods:{required,optional,dlc},index,files,type}]
-// load and parse each preset file and return all the info
-//TODO: detect local mods
-function parsePresetsSource(config) {
-    const presets = [];
+// TODO: create UI to drag & drop/upload preset html to generate url
+// TODO: detect local mods
+function TODO_parsePresetFile(source) {
+    const re = {
+        name: 'arma3pregen',
+        ids: []
+    };
 
-    // parses the html source and returns regex results combined with additional data
-    const parseA3LPreset = (html_source, additional) => {
-        const name = html_source.match(/<meta name="arma:PresetName" content="(.*?)" \/>/);
-        const mods = html_source.matchAll(/<tr data-type="(Mod|Dlc)Container">[\s\S]*?<td data-type="DisplayName">(.*?)<\/td>[\s\S]*?<a href="(.*?)" data-type="Link">(.*?)<\/a>/g);
+    // parses the html source and returns regex results
+    const parseA3LPreset = (src) => {
+        const name = src.match(/<meta name="arma:PresetName" content="(.*?)" \/>/);
+        const mods = src.matchAll(/<tr data-type="(Mod|Dlc)Container">[\s\S]*?<td data-type="DisplayName">(.*?)<\/td>[\s\S]*?<a href="(.*?)" data-type="Link">(.*?)<\/a>/g); // TODO: detect local mods
         return {
             name,
-            mods,
-            ...additional
+            mods
         }
     };
-    //TODO: sanitize name
-    // r.name ? r.name[1].replace(/\W/g, '') : ''
-    /*
-    // sort mods, 
-    //TODO: detect local mods
-        for (const m of r.mods) {
-            if (m[3] !== m[4]) {
-                console.warn('Link mismatch', m);
-            }
 
-            if (m[1] === 'Mod') {
-                
-            } else if (m[1] === 'Dlc') {
-                
-            }
-        }
-    */
+    const presetData = parseA3LPreset(source);
 
-    // marshalls all requests together so we can run them parallel
-    const promises = config.reduce((p, files, index) => {
-        for (const type of ['required', 'optional']) {
-            if (files[type] !== undefined && files[type] !== '') {
-                p.push(fetch('servers-and-mods/' + files[type])
-                    .then(res => res.text())
-                    .then(text => parseA3LPreset(text, { index, files, type })));
-            }
-        }
-        return p;
-    }, []);
+    const pname = presetData.name[1].replace(/\W/g, '');
+    if (pname) re.name = pname;
 
-    // wait for all the requests to resolve and sort / format the data
-    return Promise.all(promises.map(p => p.catch(e => e))).then(res_arr => {
-        for (const r of res_arr) {
-            if (r instanceof Error) {
-                console.error(r);
-            } else {
-                const html = r.files[r.type];
-                if (presets[r.index] === undefined) {
-                    presets[r.index] = {
-                        name: r.name ? r.name[1] : html,
-                        html: html,
-                        mods: {
-                            dlc: [],
-                            required: [],
-                            optional: []
-                        }
-                    };
-                }
-
-                if (r.type === 'required') {
-                    presets[r.index].name = r.name ? r.name[1] : html;
-                    presets[r.index].html = html;
-                }
-
-                for (const m of r.mods) {
-                    if (m[3] !== m[4]) {
-                        console.warn('Link mismatch', m);
-                    }
-
-                    if (m[1] === 'Mod') {
-                        presets[r.index].mods[r.type].push({
-                            name: m[2],
-                            link: m[3]
-                        });
-                    } else if (m[1] === 'Dlc') {
-                        presets[r.index].mods.dlc.push({
-                            name: m[2],
-                            link: m[3]
-                        });
-                    }
-                }
-            }
+    for (const m of presetData.mods) {
+        console.log('dbg:m of presetData.mods', m); // DEBUG
+        if (m[3] !== m[4]) {
+            console.warn('Link mismatch', m);
         }
 
-        return presets;
-    });
+        if (m[1] === 'Mod') {
+            // TODO: local?
+            // TODO: parse id/local mod name, and push to ids
+        } else if (m[1] === 'Dlc') {
+            // TODO: parse appid, and push to ids
+        }
+    }
+
+    return re;
 }
