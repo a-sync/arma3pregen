@@ -594,26 +594,27 @@ function parseSteamBBCode(source) {
         ['\\[strike\\](.+?)\\[/strike\\]', '<s>$1</s>'],
         ['\\[spoiler\\](.+?)\\[/spoiler\\]', '<span class="spoiler">$1</span>'],
         ['\\[noparse\\](.+?)\\[/noparse\\]', '<pre class="noparse">$1</pre>'],// TODO
-        ['\\[hr\\]' + nl, '<hr>'],
         ['\\[hr\\]\\[/hr\\]' + nl, '<hr>'],
+        ['\\[hr\\]' + nl, '<hr>'],
         ['\\[url\\](.+?)\\[/url\\]', '<a target="_blank" href="$1">$1</a>'],
         ['\\[url=(.+?)\\](.+?)\\[/url\\]', '<a target="_blank" href="$1">$2</a>'],
         ['\\[list\\]' + nl + '(.+?)\\[/list\\]' + nl, '<ul>$2</ul>'],
         ['\\[olist\\]' + nl + '(.+?)\\[/olist\\]' + nl, '<ol>$2</ol>'],
-        ['\\[\\*\\](.+?)' + nl, '<li>$1'],
         ['\\[\\*\\](.+?)\\[/\\*\\]' + nl, '<li>$1</li>'],
+        ['\\[\\*\\]' + nl, '<li>'],
         ['\\[quote\\]' + nl + '(.+?)\\[/quote\\]' + nl, '<blockquote>$2</blockquote>'],
         ['\\[quote=(.+?)\\]' + nl + '(.+?)\\[/quote\\]' + nl, '<blockquote><cite>$1</cite><br>$3</blockquote>'],
         ['\\[code\\]' + nl + '(.+?)\\[/code\\]' + nl, '<pre>$2</pre>'],
-        ['(\\r\\n|\\r|\\n)', '<br>'],
-        ['(https\\:\\/\\/store\\.steampowered\\.com\\/app\\/\\d+\\/?)', '<a target="_blank" href="$1">$1</a>'],
-        ['(https\\:\\/\\/steamcommunity\\.com\\/sharedfiles\\/filedetails\\/\\?id\\=\\d+)', '<a target="_blank" href="$1">$1</a>'],
-        ['(?:youtube\\.com\\/(?:[^\\/]+\\/.+\\/|(?:v|e(?:mbed)?)\\/|.*[?&]v=)|youtu\\.be\\/)([^"&?\\/\\s]{11})', '<a target="_blank" href="$1">$1</a>']
+        ['\\[img\\](.+?)\\[/img\\]', '<img src="$1">'],
+        ['(\\s)(https://store\\.steampowered\\.com/app/\\d+/?)', '$1<a target="_blank" href="$2">$2</a>'],
+        ['(\\s)(https://steamcommunity\\.com/sharedfiles/filedetails/\\?id=\\d+)', '$1<a target="_blank" href="$2">$2</a>'],
+        ['(\\s)(?:youtube\\.com/(?:[^/]+/.+/|(?:v|e(?:mbed)?)/|.*[?&]v=)|youtu\\.be/)([^"&?/\\s]{11})', '$1<a target="_blank" href="$2">$2</a>'],
+        ['(\\r\\n|\\r|\\n)', '<br>']
         // TODO: preview cards for youtube, steam store and steam workshop
     ];
 
     return codes.reduce(
-        (src, code) => src.replace(new RegExp(code[0], 'gms'), code[1]),
+        (src, code) => src.replace(new RegExp(code[0], 'gims'), code[1]),
         source
     );
 }
