@@ -18,9 +18,6 @@ header>h1,
     font-family: 'Black Ops One', Helvetica, Arial, sans-serif;
     font-weight: 400;
     font-variant: small-caps;
-}
-
-header>h1 {
     text-align: center;
 }
 
@@ -248,6 +245,33 @@ header>h1 {
     transform: translateY(2px);
 }
 
+summary {
+    text-align: center;
+}
+
+summary:focus,
+summary:hover {
+    text-decoration: none;
+}
+
+summary:focus span,
+summary:hover span {
+    text-decoration: underline;
+}
+
+#footer {
+    text-align: center;
+}
+
+#footer sup {
+    font-size: 0.6rem;
+}
+
+@media (prefers-color-scheme: dark) {
+    #footer a.github {
+        fill: #c6cbd1;
+    }
+}
 
 #dialog-header>#modal-title+form {
     margin-left: 1rem;
@@ -366,28 +390,4 @@ dialog+.backdrop {
     background: rgba(0, 0, 0, .61);
     -webkit-backdrop-filter: blur(4px);
     backdrop-filter: blur(4px);
-}
-
-summary:focus,
-summary:hover {
-    text-decoration: none;
-}
-
-summary:focus span,
-summary:hover span {
-    text-decoration: underline;
-}
-
-#footer {
-    text-align: center;
-}
-
-#footer sup {
-    font-size: 0.6rem;
-}
-
-@media (prefers-color-scheme: dark) {
-    #footer a.github {
-        fill: #c6cbd1;
-    }
 }
