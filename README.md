@@ -70,8 +70,12 @@ Eg.:
  - php: `php -S 0.0.0.0:80`
  - docker (php): `docker-compose up`
 
-Open `http://localhost:80/` in a browser.  
+Open `http://localhost:80/` in a browser.
 
-# TODO
+## Similar projects
+ * https://github.com/ColinM9991/Arma-Preset-Creator
+
+## TODO
  * nodejs backend
+ * mark unmet workshop dependencies and resolve on demand
  * preset file parser
