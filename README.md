@@ -40,21 +40,21 @@ Items starting with `!` are added to the preset as DLC/CDLC AppIDs.
 Only numbers and the optional `*` prefix/suffix is allowed.
 
 ### Examples:
- * FNF: [arma3pregen.devs.space/?FNF#1551644814,1551648858*](https://arma3pregen.devs.space/?FNF#1551644814,1551648858*)
+ * FNF: [arma3pregen.devs.space/?FNF#1551644814,1551648858\*](https://arma3pregen.devs.space/?FNF#1551644814,1551648858*)
    * [FNF Required Mods Collection](https://steamcommunity.com/sharedfiles/filedetails/?id=1551644814) (collection)
    * _[FNF Optional Mods Collection](https://steamcommunity.com/sharedfiles/filedetails/?id=1551648858) (collection)_
- * FNF WW2: [arma3pregen.devs.space/?FNF_WW2#1769913157,2120184260*](https://arma3pregen.devs.space/?FNF_WW2#1769913157,2120184260*)
+ * FNF WW2: [arma3pregen.devs.space/?FNF_WW2#1769913157,2120184260\*](https://arma3pregen.devs.space/?FNF_WW2#1769913157,2120184260*)
    * [FNF WW2 Mod Collection](https://steamcommunity.com/sharedfiles/filedetails/?id=1769913157) (collection)
    * _[FNF WW2 Optionals](https://steamcommunity.com/sharedfiles/filedetails/?id=2120184260) (collection)_
- * 77th JSOC: [arma3pregen.devs.space/?77th_JSOC#879092974*](https://arma3pregen.devs.space/?77th_JSOC#879092974*)
+ * 77th JSOC: [arma3pregen.devs.space/?77th_JSOC#879092974\*](https://arma3pregen.devs.space/?77th_JSOC#879092974*)
    * _[77th JSOC | Public Servers Mod Collection (Official)](https://steamcommunity.com/sharedfiles/filedetails/?id=879092974) (collection)_
- * C4G RHS: [arma3pregen.devs.space/?C4G_RHS#1290398866,*861133494,*945476727,*1180534892,*1180533757](https://arma3pregen.devs.space/?C4G_RHS#1290398866,*861133494,*945476727,*1180534892,*1180533757)
+ * C4G RHS: [arma3pregen.devs.space/?C4G_RHS#1290398866,\*861133494,\*945476727,\*1180534892,\*1180533757](https://arma3pregen.devs.space/?C4G_RHS#1290398866,*861133494,*945476727,*1180534892,*1180533757)
    * [RHS - King of the Hill by Sa-Matra](https://steamcommunity.com/sharedfiles/filedetails/?id=1290398866) (collection)
    * _[JSRS SOUNDMOD](https://steamcommunity.com/sharedfiles/filedetails/?id=861133494)_
    * _[JSRS SOUNDMOD - RHS AFRF Mod Pack Sound Support](https://steamcommunity.com/sharedfiles/filedetails/?id=945476727)_
    * _[JSRS SOUNDMOD - RHS GREF Mod Pack Sound Support](https://steamcommunity.com/sharedfiles/filedetails/?id=1180534892)_
    * _[JSRS SOUNDMOD - RHS USAF Mod Pack Sound Support](https://steamcommunity.com/sharedfiles/filedetails/?id=1180533757)_
- * Custom: [arma3pregen.devs.space/?My_Custom_Vietnam_Modlist_2022q2#!1227700,450814997,463939057,@my_local_mod,*333310405,*@optional_local_mod,*!288520](https://arma3pregen.devs.space/?My_Custom_Vietnam_Modlist_2022q2#!1227700,450814997,463939057,@my_local_mod,*333310405,*@optional_local_mod,*!288520)
+ * Custom: [arma3pregen.devs.space/?My_Custom_Vietnam_Modlist_2022q2#!1227700,450814997,463939057,@my_local_mod,\*333310405,\*@optional_local_mod,\*!288520](https://arma3pregen.devs.space/?My_Custom_Vietnam_Modlist_2022q2#!1227700,450814997,463939057,@my_local_mod,*333310405,*@optional_local_mod,*!288520)
    * [Arma 3 Creator DLC: S.O.G. Prairie Fire](https://store.steampowered.com/app/1227700) (DLC)
    * [CBA_A3](https://steamcommunity.com/sharedfiles/filedetails/?id=450814997)
    * [ace](https://steamcommunity.com/sharedfiles/filedetails/?id=463939057)
