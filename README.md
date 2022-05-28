@@ -10,13 +10,13 @@ Customizable Arma 3 Launcher preset files generated client side from a list of s
 
 Listed IDs are evaluated from left to right in order.  
 Mods inherit the optional flag from collections but the last state in order affecting a mod takes precendece when rendering the UI.  
-This means that you can override the optional flags of certain items in collections to extend / restrict them, in other words it allows you to mix and combine existing collections and mods to customize the required and optional presets in any way you like.  
+This means that you can override the optional flags of certain items in collections to extend / restrict them, in other words it allows you to mix and combine existing collections and mods to customize the required and optional mods in any way you like.  
 
 The selected optional mods are remembered client side in relation to the preset name.  
 You should also take advantage of the workshop collection feature and create permanent links with workshop IDs pointing to the currently used required and optional collections. _(see examples)_
 
 ## Sources
-All the preset information (name, included DLCs, required and optional mods) is stored in the app URL.  
+All the preset information (name, required and optional mods and DLCs) is stored in the app URL.  
 The [steam workshop](https://steamcommunity.com/app/107410/workshop/) is considered the single source of truth.  
 
 ## Options
