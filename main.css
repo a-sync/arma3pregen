@@ -287,7 +287,11 @@ summary:hover span {
     text-decoration: none;
 }
 
-#dialog-header>#modal-title+form {
+#modal-title>code {
+    padding: 2.5px 10px 2.5px 0;
+}
+
+#modal-title+form {
     margin-left: 15px;
 }
 
