@@ -59,8 +59,8 @@ async function init() {
             render(presetIds);
             id('dl-button').addEventListener('click', downloadPreset);
         } else {
-            if (confirm('Redirect to the README?')) window.location.replace('https://github.com/a-sync/arma3pregen');
-            else id('loading').textContent = 'No IDs detected.';
+            if (confirm('Redirect to the README?')) window.location.replace('https://github.com/a-sync/arma3pregen#readme');
+            else id('loading').textContent = 'No valid IDs found in the URL.';
         }
     } catch (err) {
         console.error(err);
