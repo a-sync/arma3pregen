@@ -1,33 +1,24 @@
 <?php
+define('CACHE_MAX_AGE', intval(@getenv('CACHE_MAX_AGE')));
+
 header('Content-Type: application/json');
-// header('Cache-Control: max-age=' . intval(getenv('CACHE_MAX_AGE')));
 try {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        $_POST = json_decode(file_get_contents('php://input'), true);
-        $api = '';
-        $idList = [];
-        $pl = [];
+        $body = file_get_contents('php://input');
+        if (!$body) throw new Error('Invalid request body');
 
-        if (is_array($_POST['payload'])) {
-            foreach ($_POST['payload'] as $id) {
+        $postData = json_decode($body, true);
+        $idList = [];
+
+        if (is_array($postData['payload'])) {
+            foreach ($postData['payload'] as $id) {
                 if (ctype_digit($id)) $idList[] = $id;
             }
         }
         if (count($idList) === 0) throw new Error('Invalid payload');
 
-        if ($_POST['api'] === 'file') {
-            $api = 'ISteamRemoteStorage/GetPublishedFileDetails';
-            $pl = [
-                'itemcount' => count($idList),
-                'publishedfileids' => $idList
-            ];
-        } elseif ($_POST['api'] === 'collection') {
-            $api = 'ISteamRemoteStorage/GetCollectionDetails';
-            $pl = [
-                'collectioncount' => count($idList),
-                'publishedfileids' => $idList
-            ];
-        } elseif ($_POST['api'] === 'app') {
+        $re = '';
+        if ($postData['api'] === 'app') {
             $response = [];
             foreach ($idList as $id) {
                 $appId = intval($id);
@@ -40,21 +31,38 @@ try {
                 } catch (Error $err) {}
             }
 
-            die(json_encode(['response' => $response]));
-        } else throw new Error('Invalid api');
+            $re = json_encode(['response' => $response]);
+        } else {
+            $api = '';
+            $pl = [];
+            if ($postData['api'] === 'file') {
+                $api = 'ISteamRemoteStorage/GetPublishedFileDetails';
+                $pl = [
+                    'itemcount' => count($idList),
+                    'publishedfileids' => $idList
+                ];
+            } elseif ($postData['api'] === 'collection') {
+                $api = 'ISteamRemoteStorage/GetCollectionDetails';
+                $pl = [
+                    'collectioncount' => count($idList),
+                    'publishedfileids' => $idList
+                ];
+            } else throw new Error('Invalid api');
 
-        $context = stream_context_create([
-            'http' => [
-                'method'  => 'POST',
-                'header'  => 'Content-Type: application/x-www-form-urlencoded; User-Agent: arma3pregen/1.0',
-                'content' => http_build_query($pl)
-            ]
-        ]);
+            $context = stream_context_create([
+                'http' => [
+                    'method'  => 'POST',
+                    'header'  => 'Content-Type: application/x-www-form-urlencoded; User-Agent: arma3pregen/1.0',
+                    'content' => http_build_query($pl)
+                ]
+            ]);
+            $re = file_get_contents('https://api.steampowered.com/' . $api . '/v1/?', false, $context);
+        }
 
-        die(file_get_contents('https://api.steampowered.com/' . $api . '/v1/?', false, $context));
+        // header('Cache-Control: max-age=' . CACHE_MAX_AGE);
+        die($re);
     } else throw new Error('Invalid method');
 } catch (Error $err) {
-    $msg = 'Bad Request. ' . $err->getMessage();
     http_response_code(400);
-    die(json_encode(['error' => $msg]));
+    die(json_encode(['error' => $err->getMessage()]));
 }
