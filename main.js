@@ -122,7 +122,7 @@ async function parsePresetIds(presetIds) {
 
     const collections = await fetch('backend/', {
         method: 'POST',
-        headers: { 'content-type': 'application/json' },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ api: 'collection', payload: workshopIds })
     }).then(res => res.json());
 
@@ -141,7 +141,7 @@ async function parsePresetIds(presetIds) {
 
     const mods = await fetch('backend/', {
         method: 'POST',
-        headers: { 'content-type': 'application/json' },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ api: 'file', payload: workshopIds.concat(modIds) })
     }).then(res => res.json());
 
@@ -155,7 +155,7 @@ async function parsePresetIds(presetIds) {
     if (dlcAppIds.length) {
         const dlcs = await fetch('backend/', {
             method: 'POST',
-            headers: { 'content-type': 'application/json' },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ api: 'app', payload: dlcAppIds })
         }).then(res => res.json());
 

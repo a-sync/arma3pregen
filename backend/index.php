@@ -1,5 +1,6 @@
 <?php
-header('content-type: application/json');
+header('Content-Type: application/json');
+// header('Cache-Control: max-age=' . intval(getenv('CACHE_MAX_AGE')));
 try {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_POST = json_decode(file_get_contents('php://input'), true);
@@ -45,7 +46,7 @@ try {
         $context = stream_context_create([
             'http' => [
                 'method'  => 'POST',
-                'header'  => 'content-type: application/x-www-form-urlencoded; user-agent: arma3pregen/1.0',
+                'header'  => 'Content-Type: application/x-www-form-urlencoded; User-Agent: arma3pregen/1.0',
                 'content' => http_build_query($pl)
             ]
         ]);
@@ -55,5 +56,5 @@ try {
 } catch (Error $err) {
     $msg = 'Bad Request. ' . $err->getMessage();
     http_response_code(400);
-    die(print_r(['error' => $msg], true));
+    die(json_encode(['error' => $msg]));
 }
