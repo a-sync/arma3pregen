@@ -410,7 +410,7 @@ function renderDownloadButton() {
         else return p;
     }, 0);
 
-    let dlBtnDescText = '';
+    let dlBtnDescText = 'No mods selected.';
     if (uniqueAll.length > 0) {
         dlBtnDescText = 'Contains ';
         if (unique.req.length > 0) {
