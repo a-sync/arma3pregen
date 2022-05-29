@@ -50,6 +50,7 @@ async function init() {
     try {
         const presetIds = parseUrl();
         PRESET_NAME = presetIds.name;
+        document.title = 'Arma 3 Preset Generator - ' + PRESET_NAME.replaceAll(/_/g, ' ');
         if (DBG) console.log('dbg:presetIds', presetIds);
 
         if (presetIds.ids.length > 0) {
@@ -70,6 +71,29 @@ async function init() {
     }
 }
 
+function parseIds(str) {
+    const re = [];
+    const idsArray = str.split(',');
+
+    for (const i of idsArray) {
+        const idMatch = Array.from(i.matchAll(/^\*?(!?\d+|@\w+)\*?$/g));
+
+        if (idMatch.length === 1 && idMatch[0].length === 2) {
+            const id = idMatch[0][1];
+            re.push({
+                optional: Boolean(i !== id),
+                local: Boolean(id.slice(0, 1) === '@'),
+                dlc: Boolean(id.slice(0, 1) === '!'),
+                id
+            });
+        } else {
+            console.error('Skipping invalid ID in list', i);
+        }
+    }
+
+    return re;
+}
+
 function parseUrl() {
     const loc = window.location;
     const re = {
@@ -78,28 +102,24 @@ function parseUrl() {
     };
 
     if (loc.search.length > 1) {
-        const pname = loc.search.slice(1).replaceAll(/\W/g, '');
+        const qs = decodeURIComponent(loc.search.slice(1));
+        const sepIndex = qs.indexOf('=');
+
+        let pname = '';
+        if (sepIndex > -1) {
+            const qsParam = qs.slice(0, sepIndex);
+            pname = qsParam.replaceAll(/\W/g, '');
+            re.ids = re.ids.concat(parseIds(qs.slice(sepIndex + 1)));
+        } else {
+            if(/^\d+$/.test(qs)) re.ids = re.ids.concat(parseIds(qs));
+            else if (/^\w+$/.test(qs)) pname = qs.replaceAll(/\W/g, '');
+            else re.ids = re.ids.concat(parseIds(qs));
+        }
+
         if (pname) re.name = pname;
     }
 
-    if (loc.hash.length > 1) {
-        const idsArray = loc.hash.slice(1).split(',');
-        for (const i of idsArray) {
-            const idMatch = Array.from(i.matchAll(/^\*?(!?\d+|@\w+)\*?$/g));
-
-            if (idMatch.length === 1 && idMatch[0].length === 2) {
-                const id = idMatch[0][1];
-                re.ids.push({
-                    optional: Boolean(i !== id),
-                    local: Boolean(id.slice(0, 1) === '@'),
-                    dlc: Boolean(id.slice(0, 1) === '!'),
-                    id
-                });
-            } else {
-                console.error('Skipping invalid ID in list', i);
-            }
-        }
-    }
+    if (loc.hash.length > 1) re.ids = re.ids.concat(parseIds(loc.hash.slice(1)));
 
     return re;
 }
