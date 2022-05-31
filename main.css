@@ -273,8 +273,26 @@ summary:hover span {
     }
 }
 
-#dialog-header>#modal-title+form {
-    margin-left: 1rem;
+#dialog-header {
+    padding: 10px 20px;
+}
+
+#modal-title {
+    font-weight: bold;
+    text-align: left;
+    max-width: 585px;
+}
+
+#modal-title>a:hover {
+    text-decoration: none;
+}
+
+#modal-title>code {
+    padding: 2.5px 10px 2.5px 0;
+}
+
+#modal-title+form {
+    margin-left: 15px;
 }
 
 #dialog-header button {
@@ -286,19 +304,6 @@ summary:hover span {
 #dialog-content input[type=checkbox]:focus {
     border: 0;
     box-shadow: none;
-}
-
-#dialog-header {
-    padding: 10px 20px;
-}
-
-#modal-title {
-    font-weight: bold;
-    text-align: left;
-}
-
-#modal-title>a:hover {
-    text-decoration: none;
 }
 
 #dialog-content {
