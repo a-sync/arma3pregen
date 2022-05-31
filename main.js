@@ -140,35 +140,40 @@ async function parsePresetIds(presetIds) {
         }
     }
 
-    const collections = await fetch('backend/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ api: 'collection', payload: workshopIds })
-    }).then(res => res.json());
-
     const modIds = [];
     const collectionChildren = {};
-    if (collections.response.resultcount > 0) {
-        for (const cd of collections.response.collectiondetails) {
-            if (cd.result === 1 && cd.children && cd.children.length > 0) {
-                collectionChildren[cd.publishedfileid] = cd.children.map(cdc => {
-                    modIds.push(cdc.publishedfileid);
-                    return cdc.publishedfileid;
-                });
+
+    if (workshopIds.length > 0) {
+        const collections = await fetch('backend/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ api: 'collection', payload: workshopIds })
+        }).then(res => res.json());
+
+        if (collections.response && collections.response.resultcount > 0) {
+            for (const cd of collections.response.collectiondetails) {
+                if (cd.result === 1 && cd.children && cd.children.length > 0) {
+                    collectionChildren[cd.publishedfileid] = cd.children.map(cdc => {
+                        modIds.push(cdc.publishedfileid);
+                        return cdc.publishedfileid;
+                    });
+                }
             }
         }
     }
 
-    const mods = await fetch('backend/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ api: 'file', payload: workshopIds.concat(modIds) })
-    }).then(res => res.json());
+    if (workshopIds.length + modIds.length > 0) {
+        const mods = await fetch('backend/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ api: 'file', payload: workshopIds.concat(modIds) })
+        }).then(res => res.json());
 
-    if (mods.response.resultcount > 0) {
-        for (const f of mods.response.publishedfiledetails) {
-            if (collectionChildren[f.publishedfileid]) f._children = collectionChildren[f.publishedfileid];
-            if (f.result && f.result !== 9) modDetails.push(f);
+        if (mods.response && mods.response.resultcount > 0) {
+            for (const f of mods.response.publishedfiledetails) {
+                if (collectionChildren[f.publishedfileid]) f._children = collectionChildren[f.publishedfileid];
+                if (f.result && f.result !== 9) modDetails.push(f);
+            }
         }
     }
 
