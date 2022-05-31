@@ -1,7 +1,7 @@
-import { request } from 'https';
+const { request } = require('https');
 const CACHE_MAX_AGE = parseInt(process.env.CACHE_MAX_AGE || '0', 10);
 
-export default async (req, res) => {
+module.exports = async (req, res) => {
     try {
         if (req.method === 'POST') {
             const body = await new Promise(resolve => {

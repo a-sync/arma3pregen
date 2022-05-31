@@ -1,7 +1,7 @@
-import fs from 'fs';
-import { createServer } from 'http';
-import { URL } from 'url';
-import backend from './backend/index.mjs';
+const fs = require('fs');
+const { createServer } = require('http');
+const { URL } = require('url');
+const backend = require('./backend/index.js');
 
 const APP_HOST = process.env.app_host || process.env.APP_HOST || '0.0.0.0';
 const APP_PORT = parseInt(process.env.app_port || process.env.APP_PORT || '80', 10);
