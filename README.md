@@ -41,25 +41,25 @@ Items starting with `@` are added to the preset as local mods.
 Only alphanumeric characters + `_` and the optional `*` prefix/suffix is allowed.
 
 ## Examples
- * FNF: [arma3pregen.devs.space/?FNF=1551644814,1551648858\*](https://arma3pregen.devs.space/?FNF=1551644814,1551648858*)
+ * FNF: [arma3pregen.cloudno.de/?FNF=1551644814,1551648858\*](https://arma3pregen.cloudno.de/?FNF=1551644814,1551648858*)
    * **FNF**
    * [1551644814](https://steamcommunity.com/sharedfiles/filedetails/?id=1551644814) FNF Required Mods Collection (collection)
    * _[1551648858](https://steamcommunity.com/sharedfiles/filedetails/?id=1551648858) FNF Optional Mods Collection (collection)_
- * FNF WW2: [arma3pregen.devs.space/?FNF_WW2=1769913157,2120184260\*](https://arma3pregen.devs.space/?FNF_WW2=1769913157,2120184260*)
+ * FNF WW2: [arma3pregen.cloudno.de/?FNF_WW2=1769913157,2120184260\*](https://arma3pregen.cloudno.de/?FNF_WW2=1769913157,2120184260*)
    * **FNF_WW2**
    * [1769913157](https://steamcommunity.com/sharedfiles/filedetails/?id=1769913157) FNF WW2 Mod Collection (collection)
    * _[2120184260](https://steamcommunity.com/sharedfiles/filedetails/?id=2120184260) FNF WW2 Optionals (collection)_
- * 77th JSOC: [arma3pregen.devs.space/?77th_JSOC=879092974\*](https://arma3pregen.devs.space/?77th_JSOC=879092974*)
+ * 77th JSOC: [arma3pregen.cloudno.de/?77th_JSOC=879092974\*](https://arma3pregen.cloudno.de/?77th_JSOC=879092974*)
    * **77th_JSOC**
    * _[879092974](https://steamcommunity.com/sharedfiles/filedetails/?id=879092974) 77th JSOC | Public Servers Mod Collection (Official) (collection)_
- * C4G RHS KotH: [arma3pregen.devs.space/?C4G_RHS_KotH=1290398866,\*861133494,\*945476727,\*1180534892,\*1180533757](https://arma3pregen.devs.space/?C4G_RHS_KotH=1290398866,*861133494,*945476727,*1180534892,*1180533757)
+ * C4G RHS KotH: [arma3pregen.cloudno.de/?C4G_RHS_KotH=1290398866,\*861133494,\*945476727,\*1180534892,\*1180533757](https://arma3pregen.cloudno.de/?C4G_RHS_KotH=1290398866,*861133494,*945476727,*1180534892,*1180533757)
    * **C4G_RHS_KotH**
    * [1290398866](https://steamcommunity.com/sharedfiles/filedetails/?id=1290398866) RHS - King of the Hill by Sa-Matra (collection)
    * _[861133494](https://steamcommunity.com/sharedfiles/filedetails/?id=861133494) JSRS SOUNDMOD_
    * _[945476727](https://steamcommunity.com/sharedfiles/filedetails/?id=945476727) JSRS SOUNDMOD - RHS AFRF Mod Pack Sound Support_
    * _[1180534892](https://steamcommunity.com/sharedfiles/filedetails/?id=1180534892) JSRS SOUNDMOD - RHS GREF Mod Pack Sound Support_
    * _[1180533757](https://steamcommunity.com/sharedfiles/filedetails/?id=1180533757) JSRS SOUNDMOD - RHS USAF Mod Pack Sound Support_
- * Custom: [arma3pregen.devs.space/?My_Custom_Vietnam_Modlist_2022q2=!1227700,450814997,463939057,@my_local_mod,\*333310405,\*@optional_local_mod,\*!288520](https://arma3pregen.devs.space/?My_Custom_Vietnam_Modlist_2022q2=!1227700,450814997,463939057,@my_local_mod,*333310405,*@optional_local_mod,*!288520)
+ * Custom: [arma3pregen.cloudno.de/?My_Custom_Vietnam_Modlist_2022q2=!1227700,450814997,463939057,@my_local_mod,\*333310405,\*@optional_local_mod,\*!288520](https://arma3pregen.cloudno.de/?My_Custom_Vietnam_Modlist_2022q2=!1227700,450814997,463939057,@my_local_mod,*333310405,*@optional_local_mod,*!288520)
    * **My_Custom_Vietnam_Modlist_2022q2**
    * [!1227700](https://store.steampowered.com/app/1227700) Arma 3 Creator DLC: S.O.G. Prairie Fire (DLC)
    * [450814997](https://steamcommunity.com/sharedfiles/filedetails/?id=450814997) CBA_A3
@@ -72,7 +72,7 @@ Only alphanumeric characters + `_` and the optional `*` prefix/suffix is allowed
 ## Self hosting
 NodeJS or PHP runtime is required to relay backend calls to the steam API. _(CORS disabled 😔)_  
 Spin up an instance on `http://localhost/` with one of these commands:
- * nodejs: `node server.mjs`
+ * nodejs: `node server.js`
  * php: `php -S 0.0.0.0:80`
  * docker (php): `docker-compose up`
 
