@@ -13,9 +13,9 @@ All the preset information _(preset name, mods/collections, DLCs, optional flags
 Additional information is loaded through various steam APIs but the [steam workshop](https://steamcommunity.com/app/107410/workshop/) is considered the single source of truth.
 
 ## Preset name
-Custom preset name / file name appended to the URL after `?`.  
-Only alphanumeric characters + `_` is allowed.  
-If the preset name exists, the ID list must be separated with `=`.
+Custom preset name / file name can be appended to the URL after `?`.  
+Only alphanumeric characters + `_` is allowed.  
+If the preset name is set, the ID list must be separated with `=`.
 
 ## ID list
 Comma `,` separated list of IDs evaluated from left to right in order. Appended to the URL after `?` or `=`.  
