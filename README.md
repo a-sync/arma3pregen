@@ -10,11 +10,11 @@ Customizable Arma 3 Launcher preset files generated client side from a list of s
 
 ## URL format 
 All the preset information _(preset name, mods/collections, DLCs, optional flags)_ is stored in the app URL's query string component.  
-Additional information is loaded through various steam APIs but the [steam workshop](https://steamcommunity.com/app/107410/workshop/) is considered the single source of truth.
+Additional information is fetched from various steam APIs but the [steam workshop](https://steamcommunity.com/app/107410/workshop/) is considered the single source of truth.
 
 ## Preset name
-Custom preset name / file name can be appended to the URL after `?`.  
-Only alphanumeric characters + `_` is allowed.  
+Custom preset name / file name can be appended to the URL after `?`.  
+Only alphanumeric characters + `_` is allowed.  
 If the preset name is set, the ID list must be separated with `=`.
 
 ## ID list

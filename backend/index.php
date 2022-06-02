@@ -28,7 +28,8 @@ try {
                     if (isset($json[$appId]) && $json[$appId]['success'] === true) {
                         $response[] = $json[$appId]['data'];
                     }
-                } catch (Error $err) {}
+                } catch (Error $err) {
+                }
             }
 
             $re = json_encode(['response' => $response]);

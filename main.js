@@ -111,7 +111,7 @@ function parseUrl() {
             pname = qsParam.replaceAll(/\W/g, '');
             re.ids = re.ids.concat(parseIds(qs.slice(sepIndex + 1)));
         } else {
-            if(/^\d+$/.test(qs)) re.ids = re.ids.concat(parseIds(qs));
+            if (/^\d+$/.test(qs)) re.ids = re.ids.concat(parseIds(qs));
             else if (/^\w+$/.test(qs)) pname = qs.replaceAll(/\W/g, '');
             else re.ids = re.ids.concat(parseIds(qs));
         }
@@ -124,6 +124,7 @@ function parseUrl() {
     return re;
 }
 
+const VALID_APP_IDS = [107410]; // Arma 3
 async function parsePresetIds(presetIds) {
     const modDetails = [];
     const workshopIds = [];
@@ -150,7 +151,8 @@ async function parsePresetIds(presetIds) {
             body: JSON.stringify({ api: 'collection', payload: workshopIds })
         }).then(res => res.json());
 
-        if (collections.response && collections.response.resultcount > 0) {
+        if (collections.error) console.error(collections.error);
+        else if (collections.response && collections.response.resultcount > 0) {
             for (const cd of collections.response.collectiondetails) {
                 if (cd.result === 1 && cd.children && cd.children.length > 0) {
                     collectionChildren[cd.publishedfileid] = cd.children.map(cdc => {
@@ -169,24 +171,34 @@ async function parsePresetIds(presetIds) {
             body: JSON.stringify({ api: 'file', payload: workshopIds.concat(modIds) })
         }).then(res => res.json());
 
-        if (mods.response && mods.response.resultcount > 0) {
+        if (mods.error) console.error(mods.error);
+        else if (mods.response && mods.response.resultcount > 0) {
             for (const f of mods.response.publishedfiledetails) {
-                if (collectionChildren[f.publishedfileid]) f._children = collectionChildren[f.publishedfileid];
-                if (f.result && f.result !== 9) modDetails.push(f);
+                if (VALID_APP_IDS.includes(f.consumer_app_id)) {
+                    if (collectionChildren[f.publishedfileid]) f._children = collectionChildren[f.publishedfileid];
+                    if (f.result && f.result !== 9) modDetails.push(f);
+                }
             }
         }
     }
 
     if (dlcAppIds.length) {
-        const dlcs = await fetch('backend/', {
+        const dlcs = await Promise.all(dlcAppIds.map(appId => fetch('backend/', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ api: 'app', payload: dlcAppIds })
-        }).then(res => res.json());
+            body: JSON.stringify({ api: 'app', payload: [appId] })
+        }).then(res => res.json()).catch(err => err)));
 
-        for (const d of dlcs.response) {
-            d._dlc = '!' + d.steam_appid;
-            modDetails.push(d);
+        for (const dlc of dlcs) {
+            if (dlc.error || dlc instanceof Error) console.error(dlc.error || dlc);
+            else {
+                for (const d of dlc.response) {
+                    if (d.fullgame && VALID_APP_IDS.includes(parseInt(d.fullgame.appid, 10))) {
+                        d._dlc = '!' + d.steam_appid;
+                        modDetails.push(d);
+                    }
+                }
+            }
         }
     }
 

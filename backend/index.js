@@ -30,7 +30,7 @@ module.exports = async (req, res) => {
                         const r = await get('https://store.steampowered.com/api/appdetails?appids=' + id);
                         const j = JSON.parse(r);
                         if (appId in j && j[appId]['success'] === true) response.push(j[appId]['data']);
-                    } catch (err) {}
+                    } catch (err) { }
                 }
 
                 re = JSON.stringify({ response });
