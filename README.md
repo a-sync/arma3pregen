@@ -80,6 +80,18 @@ _The app can be served from under any subdomain or path._
 
 ## Similar projects
  * https://github.com/ColinM9991/Arma-Preset-Creator
+ * https://github.com/AgentBlackout/A3PresetTools
+ * https://github.com/prozyon/A3-preset-analyzer
+ * https://github.com/DWaffles/Arma-3-Modpack-Calculator
+ * https://github.com/butaosuinu/arma3_steam-collection_to_preset_converter
+ * https://github.com/Freddo3000/a3update.py
+ * https://github.com/byjokese/Arma-Server-Config-Generator
+ * https://github.com/Elenui/Arma3-Mod-Manager
+ * https://github.com/Setlerr/arma-3-html-exporter
+ * https://github.com/ProPanek/Arma3ModsPresetParser
+ * https://github.com/lukegotjellyfish/ArmaPresetSorter
+ * https://github.com/VurtualRuler98/arma3-preset-script
+ * https://github.com/cconsi/PresetProcessor
 
 ## TODO
  * python backend
