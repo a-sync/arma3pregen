@@ -78,6 +78,9 @@ Spin up an instance on `http://localhost/` with one of these commands:
 
 _The app can be served from under any subdomain or path._
 
+### Environmental variables
+`CACHE_MAX_AGE` env var controls the browser cache for backend requests in seconds. _(default: 0)_
+
 ## Similar projects
  * https://github.com/ColinM9991/Arma-Preset-Creator
  * https://github.com/AgentBlackout/A3PresetTools

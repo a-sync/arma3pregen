@@ -60,7 +60,7 @@ try {
             $re = file_get_contents('https://api.steampowered.com/' . $api . '/v1/?', false, $context);
         }
 
-        // header('Cache-Control: max-age=' . CACHE_MAX_AGE);
+        header('Cache-Control: max-age=' . CACHE_MAX_AGE);
         die($re);
     } else throw new Error('Invalid method');
 } catch (Error $err) {

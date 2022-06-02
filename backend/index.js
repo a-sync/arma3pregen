@@ -51,8 +51,8 @@ module.exports = async (req, res) => {
             }
 
             res.writeHead(200, {
-                'Content-Type': 'application/json'
-                // 'Cache-Control': 'max-age=' + CACHE_MAX_AGE
+                'Content-Type': 'application/json',
+                'Cache-Control': 'max-age=' + CACHE_MAX_AGE
             });
             res.end(re);
         } else throw new Error('Invalid method');
