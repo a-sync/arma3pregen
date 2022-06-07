@@ -356,6 +356,35 @@ summary:hover span {
     margin-bottom: 6px;
 }
 
+#dialog-content .description h2.bb_h2 {
+    clear: both;
+    color: #5aa9d6;
+    line-height: 21px;
+    font-size: 18px;
+    font-weight: 400;
+    margin-top: 8px;
+    margin-bottom: 6px;
+}
+
+#dialog-content .description h2.bb_tag {
+    margin-top: 20px;
+    margin-bottom: 0px;
+    background-image: none;
+    font-size: 15px;
+    color: #2f89bc;
+    text-transform: none;
+    letter-spacing: 0px;
+}
+
+#dialog-content .description h2.bb_tag strong {
+    font-family: 'Motiva Sans', Sans-serif;
+    font-weight: 500;
+}
+
+#dialog-content .description h2.bb_tag+br {
+    display: none;
+}
+
 #dialog-content .description h3 {
     clear: both;
     color: #5aa9d6;
@@ -364,6 +393,23 @@ summary:hover span {
     font-weight: 300;
     margin-top: 8px;
     margin-bottom: 6px;
+}
+
+#dialog-content .description ul,
+#dialog-content .description ol {
+    margin: 5px;
+}
+
+#dialog-content .description ul.bb_ul {
+    margin: 0 0 0 16px;
+    padding: 0;
+    list-style-type: square;
+    padding-inline-start: 0.2em;
+}
+
+#dialog-content .description ul.bb_ul>li {
+    list-style-position: outside;
+    margin-bottom: 8px;
 }
 
 #dialog-content .description span.spoiler {
@@ -384,11 +430,6 @@ summary:hover span {
 #dialog-content .description span.spoiler:hover * {
     color: inherit;
     background-color: inherit;
-}
-
-#dialog-content .description ul,
-#dialog-content .description ol {
-    margin: 5px;
 }
 
 #dialog-content .description pre {
