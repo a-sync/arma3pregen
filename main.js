@@ -689,12 +689,12 @@ function downloadPreset() {
         if (mod) {
             if (Boolean(mod._dlc)) {
                 const link = 'https://store.steampowered.com/app/' + mod.steam_appid || mod._dlc.slice(1);
-                dlcContainers.push('<tr data-type="DlcContainer"><td data-type="DisplayName">' + mod.name + '</td><td><a href="' + link + '" data-type="Link">' + link + '</a></td></tr>');
+                dlcContainers.push('<tr data-type="DlcContainer"><td data-type="DisplayName">' + he.encode(mod.name) + '</td><td><a href="' + link + '" data-type="Link">' + link + '</a></td></tr>');
             } else if (Boolean(mod._local)) {
-                modContainers.push('<tr data-type="ModContainer"><td data-type="DisplayName">' + mod.id + '</td><td><span class="from-local">Local</span></td><td><span class="whups" data-type="Link" data-meta="local:' + mod.id + '|' + mod.id + '|" /></td></tr>');
+                modContainers.push('<tr data-type="ModContainer"><td data-type="DisplayName">' + he.encode(mod.id) + '</td><td><span class="from-local">Local</span></td><td><span class="whups" data-type="Link" data-meta="local:' + mod.id + '|' + mod.id + '|" /></td></tr>');
             } else {
                 const link = 'http://steamcommunity.com/sharedfiles/filedetails/?id=' + mod.publishedfileid;
-                modContainers.push('<tr data-type="ModContainer"><td data-type="DisplayName">' + mod.title + '</td><td><span class="from-steam">Steam</span></td><td><a href="' + link + '" data-type="Link">' + link + '</a></td></tr>');
+                modContainers.push('<tr data-type="ModContainer"><td data-type="DisplayName">' + he.encode(mod.title) + '</td><td><span class="from-steam">Steam</span></td><td><a href="' + link + '" data-type="Link">' + link + '</a></td></tr>');
             }
         }
     }
