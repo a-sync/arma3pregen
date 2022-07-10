@@ -95,6 +95,7 @@ _The app can be served from under any subdomain or path._
  * https://github.com/lukegotjellyfish/ArmaPresetSorter
  * https://github.com/VurtualRuler98/arma3-preset-script
  * https://github.com/cconsi/PresetProcessor
+ * https://github.com/TehGreatFred/armaModIDFormatter
 
 ## TODO
  * python backend
