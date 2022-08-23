@@ -670,7 +670,7 @@ function formatBytes(bytes, decimals) {
 }
 
 const PRESET_LOGO = 'https://community.bistudio.com/wikidata/images/thumb/6/6c/Arma3LauncherIcon.png/192px-Arma3LauncherIcon.png';
-const PRESET_TEMPLATE = '<?xml version="1.0" encoding="utf-8"?><html><!--Created by https://a-sync.github.io/arma3pregen--><head><meta name="arma:Type" content="preset" /><meta name="arma:PresetName" content="{PRESET_NAME}" /><meta name="generator" content="Arma 3 Launcher - https://a-sync.github.io/arma3pregen" /><title>Arma 3 - Preset {PRESET_NAME}</title><link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" type="text/css" /><style>body{margin:0;padding:0;color:#fff;background:#000}body,td,th{font:95%/1.3 Roboto, Segoe UI, Tahoma, Arial, Helvetica, sans-serif}td{padding:3px 30px 3px 0}h1{padding:20px 20px 0 72px;color:white;font-weight:200;font-family:segoe ui;font-size:3em;margin:0;background:transparent url(' + PRESET_LOGO + ') 3px 15px no-repeat;background-size: 64px auto;}em{font-variant:italic;color:silver}.before-list{padding:5px 20px 10px}.mod-list{background:#222222;padding:20px}.dlc-list{background:#222222;padding:20px}.footer{padding:20px;color:gray}.whups{color:gray}a{color:#D18F21;text-decoration:underline}a:hover{color:#F1AF41;text-decoration:none}.from-steam{color:#449EBD}.from-local{color:gray}</style></head><body><h1>Arma 3 - Preset <strong>{PRESET_NAME}</strong></h1><p class="before-list"><em>Drag this file over the Arma 3 Launcher or load it from Mods / Preset / Import.</em></p><div class="mod-list"><table>{MOD_LIST}</table></div><div class="dlc-list"><table>{DLC_LIST}</table></div><div class="footer"><span>Created by <a href="https://a-sync.github.io/arma3pregen">https://a-sync.github.io/arma3pregen</a></span></div></body></html>';
+const PRESET_TEMPLATE = '<?xml version="1.0" encoding="utf-8"?><html><!--Created by https://a-sync.github.io/arma3pregen--><head><meta name="arma:Type" content="preset" /><meta name="arma:PresetName" content="{PRESET_NAME}" /><meta name="generator" content="Arma 3 Launcher - https://a-sync.github.io/arma3pregen" /><title>Arma 3 - Preset {PRESET_NAME}</title><link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" type="text/css" /><style>body{margin:0;padding:0;color:#fff;background:#000}body,td,th{font:95%/1.3 Roboto, Segoe UI, Tahoma, Arial, Helvetica, sans-serif}td{padding:3px 30px 3px 0}h1{padding:20px 20px 0 72px;color:white;font-weight:200;font-family:segoe ui;font-size:3em;margin:0;background:transparent url(' + PRESET_LOGO + ') 3px 15px no-repeat;background-size: 64px auto;}em{font-variant:italic;color:silver}.before-list{padding:5px 20px 10px}.mod-list{background:#222222;padding:20px}.dlc-list{background:#222222;padding:20px}.footer{padding:20px;color:gray}.whups{color:gray}a{color:#D18F21;text-decoration:underline}a:hover{color:#F1AF41;text-decoration:none}.from-steam{color:#449EBD}.from-local{color:gray}</style></head><body><h1>Arma 3 - Preset <strong>{PRESET_NAME}</strong></h1><p class="before-list"><em>To import this preset, drag this file onto the Launcher window. Or click the MODS tab, then PRESET in the top right, then IMPORT at the bottom, and finally select this file.</em></p><div class="mod-list"><table>{MOD_LIST}</table></div><div class="dlc-list"><table>{DLC_LIST}</table></div><div class="footer"><span>Created by <a href="https://a-sync.github.io/arma3pregen">https://a-sync.github.io/arma3pregen</a></span></div></body></html>';
 
 function downloadPreset() {
     const mods = new Set();
@@ -693,7 +693,7 @@ function downloadPreset() {
             } else if (Boolean(mod._local)) {
                 modContainers.push('<tr data-type="ModContainer"><td data-type="DisplayName">' + he.encode(mod.id) + '</td><td><span class="from-local">Local</span></td><td><span class="whups" data-type="Link" data-meta="local:' + mod.id + '|' + mod.id + '|" /></td></tr>');
             } else {
-                const link = 'http://steamcommunity.com/sharedfiles/filedetails/?id=' + mod.publishedfileid;
+                const link = 'https://steamcommunity.com/sharedfiles/filedetails/?id=' + mod.publishedfileid;
                 modContainers.push('<tr data-type="ModContainer"><td data-type="DisplayName">' + he.encode(mod.title) + '</td><td><span class="from-steam">Steam</span></td><td><a href="' + link + '" data-type="Link">' + link + '</a></td></tr>');
             }
         }
@@ -713,7 +713,6 @@ function downloadPreset() {
 }
 
 // TODO: create UI to drag & drop/upload preset html to generate url
-// TODO: detect local mods
 function TODO_parsePresetFile(source) {
     const re = {
         name: 'arma3pregen',
@@ -723,6 +722,7 @@ function TODO_parsePresetFile(source) {
     // parses the html source and returns regex results
     const parseA3LPreset = (src) => {
         const name = src.match(/<meta name="arma:PresetName" content="(.*?)" \/>/);
+        // TODO: detect local mods
         const mods = src.matchAll(/<tr data-type="(Mod|Dlc)Container">[\s\S]*?<td data-type="DisplayName">(.*?)<\/td>[\s\S]*?<a href="(.*?)" data-type="Link">(.*?)<\/a>/g); // TODO: detect local mods
         return {
             name,
@@ -742,7 +742,6 @@ function TODO_parsePresetFile(source) {
         }
 
         if (m[1] === 'Mod') {
-            // TODO: local?
             // TODO: parse id/local mod name, and push to ids
         } else if (m[1] === 'Dlc') {
             // TODO: parse appid, and push to ids
