@@ -49,9 +49,9 @@ Only alphanumeric characters + `_` and the optional `*` prefix/suffix is allowed
    * **FNF_WW2**
    * [1769913157](https://steamcommunity.com/sharedfiles/filedetails/?id=1769913157) FNF WW2 Mod Collection (collection)
    * _[2120184260](https://steamcommunity.com/sharedfiles/filedetails/?id=2120184260) FNF WW2 Optionals (collection)_
- * 77th JSOC: [arma3pregen.devs.space/?77th_JSOC=879092974\*](https://arma3pregen.devs.space/?77th_JSOC=879092974*)
+ * 77th JSOC: [arma3pregen.devs.space/?77th_JSOC=2829455808\*](https://arma3pregen.devs.space/?77th_JSOC=2829455808*)
    * **77th_JSOC**
-   * _[879092974](https://steamcommunity.com/sharedfiles/filedetails/?id=879092974) 77th JSOC | Public Servers Mod Collection (Official) (collection)_
+   * _[2829455808](https://steamcommunity.com/sharedfiles/filedetails/?id=2829455808) 77th JSOC | Public Servers Mod Collection (Official) (collection)_
  * C4G RHS KotH: [arma3pregen.devs.space/?C4G_RHS_KotH=1290398866,\*861133494,\*945476727,\*1180534892,\*1180533757](https://arma3pregen.devs.space/?C4G_RHS_KotH=1290398866,*861133494,*945476727,*1180534892,*1180533757)
    * **C4G_RHS_KotH**
    * [1290398866](https://steamcommunity.com/sharedfiles/filedetails/?id=1290398866) RHS - King of the Hill by Sa-Matra (collection)
