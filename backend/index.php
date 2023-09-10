@@ -36,11 +36,27 @@ try {
         } else {
             $api = '';
             $pl = [];
-            if ($postData['api'] === 'file') {
+            if ($postData['api'] === 'file1') {
                 $api = 'ISteamRemoteStorage/GetPublishedFileDetails';
                 $pl = [
                     'itemcount' => count($idList),
                     'publishedfileids' => $idList
+                ];
+            } elseif ($postData['api'] === 'file') {
+                $api = 'IPublishedFileService/GetDetails';
+                $pl = [
+                    'key' => getenv('STEAM_WEB_API_KEY'),
+                    'appid' => 107410,
+                    'publishedfileids' => $idList,
+                    'includetags' => true,
+                    'includeadditionalpreviews' => true,
+                    'includechildren' => true,
+                    'includekvtags' => true,
+                    'includevotes' => true,
+                    'short_description' => false,
+                    'includemetadata' => true,
+                    'strip_description_bbcode' => true,
+                    'includereactions' => true
                 ];
             } elseif ($postData['api'] === 'collection') {
                 $api = 'ISteamRemoteStorage/GetCollectionDetails';

@@ -60,14 +60,13 @@ module.exports = async (req, res) => {
                     pl.includemetadata = true;
                     pl.strip_description_bbcode = true;
                     pl.includereactions = true;
-                    re = await post('https://api.steampowered.com/' + api + '/v1/?', pl);
                 } else if (postData.api === 'collection') {
                     api = 'ISteamRemoteStorage/GetCollectionDetails';
                     pl.collectioncount = idList.length;
                     pl.publishedfileids = idList;
-                    re = await post('https://api.steampowered.com/' + api + '/v1/?', pl);
                 } else throw new Error('Invalid api');
 
+                re = await post('https://api.steampowered.com/' + api + '/v1/?', pl);
             }
 
             res.writeHead(200, {
