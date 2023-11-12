@@ -172,9 +172,9 @@ async function parsePresetIds(presetIds) {
         }).then(res => res.json());
 
         if (mods.error) console.error(mods.error);
-        else if (mods.response && mods.response.resultcount > 0) {
+        else if (mods.response && (mods.response.resultcount > 0 || (mods.response.publishedfiledetails && mods.response.publishedfiledetails.length > 0))) {
             for (const f of mods.response.publishedfiledetails) {
-                if (VALID_APP_IDS.includes(f.consumer_app_id)) {
+                if (VALID_APP_IDS.includes(f.consumer_app_id) || VALID_APP_IDS.includes(f.consumer_appid)) {
                     if (collectionChildren[f.publishedfileid]) f._children = collectionChildren[f.publishedfileid];
                     if (f.result && f.result !== 9) modDetails.push(f);
                 }
@@ -443,7 +443,7 @@ function renderDownloadButton() {
 
     const size = uniqueAll.reduce((p, c) => {
         const m = getModById(c);
-        if (m && m.file_size) return p + m.file_size;
+        if (m && m.file_size) return p + parseInt(m.file_size, 10);
         else return p;
     }, 0);
 
@@ -576,10 +576,10 @@ function showInfoModal(data) {
                         let size = 0;
                         for (const c of data.mod._children) {
                             const m = getModById(c);
-                            if (m && m.file_size) size += m.file_size;
+                            if (m && m.file_size) size += parseInt(m.file_size, 10);
                         }
                         tr.append(e('td', 'Total Size'), e('td', formatBytes(size)));
-                    } else tr.append(e('td', 'File Size'), e('td', formatBytes(data.mod.file_size)));
+                    } else tr.append(e('td', 'File Size'), e('td', formatBytes(parseInt(data.mod.file_size, 10))));
                     detailsTbody.append(tr);
                 }
                 if (data.mod._children && data.mod._children.length > 0) {
@@ -603,9 +603,10 @@ function showInfoModal(data) {
                 dc.append(detailsTable);
             }
 
-            if (data.mod.description) {
+            const desc = data.mod.description || data.mod.file_description
+            if (desc) {
                 const descDiv = e('div');
-                descDiv.innerHTML = parseSteamBBCode(data.mod.description);
+                descDiv.innerHTML = parseSteamBBCode(desc);
                 descDiv.className = 'description';
                 dc.append(descDiv);
             }

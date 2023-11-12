@@ -1,5 +1,6 @@
 <?php
 define('CACHE_MAX_AGE', intval(@getenv('CACHE_MAX_AGE')));
+define('STEAM_WEB_API_KEY', strval(@getenv('STEAM_WEB_API_KEY')));
 
 header('Content-Type: application/json');
 try {
@@ -36,44 +37,62 @@ try {
         } else {
             $api = '';
             $pl = [];
-            if ($postData['api'] === 'file1') {
+            if ($postData['api'] === 'file' && STEAM_WEB_API_KEY !== '') {
+                $api = 'IPublishedFileService/GetDetails';
+                $pl = [
+                    'key' => STEAM_WEB_API_KEY,
+                    'appid' => 107410,
+                    'publishedfileids' => $idList,
+                    'includetags' => true,
+                    'includeadditionalpreviews' => false,
+                    'includechildren' => false,
+                    'includekvtags' => false,
+                    'includevotes' => false,
+                    'short_description' => false,
+                    'includeforsaledata' => false,
+                    'includemetadata' => false,
+                    'return_playtime_stats' => false,
+                    'strip_description_bbcode' => false
+                ];
+
+                $re = file_get_contents('https://api.steampowered.com/' . $api . '/v1/?' . http_build_query($pl), false, stream_context_create([
+                    'http' => [
+                        'method'  => 'GET',
+                        'header'  => 'User-Agent: arma3pregen/1.0'
+                    ]
+                ]));
+            }
+            elseif ($postData['api'] === 'file') {
                 $api = 'ISteamRemoteStorage/GetPublishedFileDetails';
                 $pl = [
                     'itemcount' => count($idList),
                     'publishedfileids' => $idList
                 ];
-            } elseif ($postData['api'] === 'file') {
-                $api = 'IPublishedFileService/GetDetails';
-                $pl = [
-                    'key' => getenv('STEAM_WEB_API_KEY'),
-                    'appid' => 107410,
-                    'publishedfileids' => $idList,
-                    'includetags' => true,
-                    'includeadditionalpreviews' => true,
-                    'includechildren' => true,
-                    'includekvtags' => true,
-                    'includevotes' => true,
-                    'short_description' => false,
-                    'includemetadata' => true,
-                    'strip_description_bbcode' => true,
-                    'includereactions' => true
-                ];
-            } elseif ($postData['api'] === 'collection') {
+
+                 $re = file_get_contents('https://api.steampowered.com/' . $api . '/v1/?', false, stream_context_create([
+                    'http' => [
+                        'method'  => 'POST',
+                        'header'  => 'Content-Type: application/x-www-form-urlencoded; User-Agent: arma3pregen/1.0',
+                        'content' => http_build_query($pl)
+                    ]
+                ]));
+            }
+            elseif ($postData['api'] === 'collection') {
                 $api = 'ISteamRemoteStorage/GetCollectionDetails';
                 $pl = [
                     'collectioncount' => count($idList),
                     'publishedfileids' => $idList
                 ];
-            } else throw new Error('Invalid api');
 
-            $context = stream_context_create([
-                'http' => [
-                    'method'  => 'POST',
-                    'header'  => 'Content-Type: application/x-www-form-urlencoded; User-Agent: arma3pregen/1.0',
-                    'content' => http_build_query($pl)
-                ]
-            ]);
-            $re = file_get_contents('https://api.steampowered.com/' . $api . '/v1/?', false, $context);
+                $re = file_get_contents('https://api.steampowered.com/' . $api . '/v1/?', false, stream_context_create([
+                    'http' => [
+                        'method'  => 'POST',
+                        'header'  => 'Content-Type: application/x-www-form-urlencoded; User-Agent: arma3pregen/1.0',
+                        'content' => http_build_query($pl)
+                    ]
+                ]));
+            }
+            else throw new Error('Invalid api');
         }
 
         header('Cache-Control: max-age=' . CACHE_MAX_AGE);

@@ -49,9 +49,9 @@ Only alphanumeric characters + `_` and the optional `*` prefix/suffix is allowed
    * **FNF_WW2**
    * [1769913157](https://steamcommunity.com/sharedfiles/filedetails/?id=1769913157) FNF WW2 Mod Collection (collection)
    * _[2120184260](https://steamcommunity.com/sharedfiles/filedetails/?id=2120184260) FNF WW2 Optionals (collection)_
- * 77th JSOC: [arma3pregen.devs.space/?77th_JSOC=2829455808\*](https://arma3pregen.devs.space/?77th_JSOC=2829455808*)
+ * 77th JSOC: [arma3pregen.devs.space/?77th_JSOC=2982471935\*](https://arma3pregen.devs.space/?77th_JSOC=2982471935*)
    * **77th_JSOC**
-   * _[2829455808](https://steamcommunity.com/sharedfiles/filedetails/?id=2829455808) 77th JSOC | Public Servers Mod Collection (Official) (collection)_
+   * _[2982471935](https://steamcommunity.com/sharedfiles/filedetails/?id=2982471935) 77th JSOC | Public Servers Mod Collection (Official) (collection)_
  * C4G RHS KotH: [arma3pregen.devs.space/?C4G_RHS_KotH=1290398866,\*861133494,\*945476727,\*1180534892,\*1180533757](https://arma3pregen.devs.space/?C4G_RHS_KotH=1290398866,*861133494,*945476727,*1180534892,*1180533757)
    * **C4G_RHS_KotH**
    * [1290398866](https://steamcommunity.com/sharedfiles/filedetails/?id=1290398866) RHS - King of the Hill by Sa-Matra (collection)
@@ -79,7 +79,8 @@ Spin up an instance on `http://localhost/` with one of these commands:
 _The app can be served from under any subdomain or path._
 
 ### Environmental variables
-`CACHE_MAX_AGE` env var controls the browser cache for backend requests in seconds. _(default: 0)_
+`CACHE_MAX_AGE` controls the browser cache for backend requests in seconds. _[default: 0]_  
+`STEAM_WEB_API_KEY` enables the usage of [API key](https://steamcommunity.com/dev/apikey) protected steam endpoints. (optional) _[default: empty]_  
 
 ## Similar projects
  * https://github.com/ColinM9991/Arma-Preset-Creator

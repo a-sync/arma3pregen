@@ -36,37 +36,51 @@ module.exports = async (req, res) => {
 
                 re = JSON.stringify({ response });
             } else {
-                let api = '';
-                const pl = {};
-                if (postData.api === 'file1') {
-                    api = 'ISteamRemoteStorage/GetPublishedFileDetails';
-                    pl.itemcount = idList.length;
-                    pl.publishedfileids = idList;
+                if (postData.api === 'file' && STEAM_WEB_API_KEY !== '') {
+                    const api = 'IPublishedFileService/GetDetails';
+                    const pl = {
+                        key: STEAM_WEB_API_KEY,
+                        appid: 107410,
+                        publishedfileids: idList,
+                        includetags: true,
+                        includeadditionalpreviews: false,
+                        includechildren: false,
+                        includekvtags: false,
+                        includevotes: false,
+                        short_description: false,
+                        includeforsaledata: false,
+                        includemetadata: false,
+                        return_playtime_stats: false,
+                        strip_description_bbcode: false
+                    }
+
+                    const params = new URLSearchParams();
+                    for (const k in pl) {
+                        if (Array.isArray(pl[k])) pl[k].forEach((l, i) => params.append(k + '[' + i + ']', l));
+                        else params.append(k, pl[k]);
+                    }
+
+                    re = await get('https://api.steampowered.com/' + api + '/v1/?' + params.toString());
+                }
+                else if (postData.api === 'file') {
+                    const api = 'ISteamRemoteStorage/GetPublishedFileDetails';
+                    const pl = {
+                        itemcount: idList.length,
+                        publishedfileids: idList
+                    };
+
                     re = await post('https://api.steampowered.com/' + api + '/v1/?', pl);
-                } else if (postData.api === 'file') {
-                    //todo: if !STEAM_WEB_API_KEY, throw error
+                }
+                else if (postData.api === 'collection') {
+                    const api = 'ISteamRemoteStorage/GetCollectionDetails';
+                    const pl = {
+                        collectioncount: idList.length,
+                        publishedfileids: idList
+                    }
 
-                    // https://api.steampowered.com/IPublishedFileService/GetDetails/v1/?publishedfileids%5B0%5D=1286101012&includetags=true&includeadditionalpreviews=true&includechildren=true&includekvtags=true&includevotes=true&short_description=&includemetadata=true&appid=107410&strip_description_bbcode=true&includereactions=true
-                    api = 'IPublishedFileService/GetDetails';
-                    pl.key = STEAM_WEB_API_KEY;
-                    pl.appid = 107410;
-                    pl.publishedfileids = idList;
-                    pl.includetags = true;
-                    pl.includeadditionalpreviews = true;
-                    pl.includechildren = true;
-                    pl.includekvtags = true;
-                    pl.includevotes = true;
-                    pl.short_description = false;
-                    pl.includemetadata = true;
-                    pl.strip_description_bbcode = true;
-                    pl.includereactions = true;
-                } else if (postData.api === 'collection') {
-                    api = 'ISteamRemoteStorage/GetCollectionDetails';
-                    pl.collectioncount = idList.length;
-                    pl.publishedfileids = idList;
-                } else throw new Error('Invalid api');
-
-                re = await post('https://api.steampowered.com/' + api + '/v1/?', pl);
+                    re = await post('https://api.steampowered.com/' + api + '/v1/?', pl);
+                }
+                else throw new Error('Invalid api');
             }
 
             res.writeHead(200, {
