@@ -3,27 +3,27 @@ Customizable Arma 3 Launcher preset files generated client side from a list of s
 
 ## Features
  * preset sharing made effortless 💚
- * optional mods can be customized on a simple UI on the fly
+ * optional mods can be customized on a simple web interface on the fly
  * outputs standard Arma 3 Launcher preset files
  * remembers previously selected optional mods
- * ~~mod data caching on the client side~~
+ * ~~client-side mod data caching~~
 
 ## URL format 
 All the preset information _(preset name, mods/collections, DLCs, optional flags)_ is stored in the app URL's query string component.  
 Additional information is fetched from various steam APIs but the [steam workshop](https://steamcommunity.com/app/107410/workshop/) is considered the single source of truth.
 
 ## Preset name
-Custom preset name / file name can be appended to the URL after `?`.  
-Only alphanumeric characters + `_` is allowed.  
+Custom preset name or file name can be appended to the URL after `?`.  
+Only alphanumeric characters and underscore (`_`) are allowed.  
 If the preset name is set, the ID list must be separated with `=`.
 
 ## ID list
 Comma `,` separated list of IDs evaluated from left to right in order. Appended to the URL after `?` or `=`.  
-Mods inherit the optional flag from collections but the last state in order affecting a mod takes precendece when rendering the UI. _(see example C4G RHS KotH)_  
+Mods inherit the optional flag from collections, but the last state in order affecting a mod takes precedence when rendering the UI. _(see example C4G RHS KotH)_  
 
 This means that you can override the optional flags of certain items in collections to extend or restrict them. In other words it allows you to mix and combine existing collections and mods to customize the required and optional mods in any way you like.  
 
-The selected optional mods are remembered client side in relation to the preset name.  
+The selected optional mods are remembered client-side in relation to the preset name.  
 You should also take advantage of the workshop collection feature and create permanent links with workshop IDs pointing to the currently used required and optional collections. _(see examples FNF and FNF WW2)_
 
 ### Optional mods
