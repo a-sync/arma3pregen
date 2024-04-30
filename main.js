@@ -41,11 +41,28 @@ function getModById(id) {
 }
 
 const DBG = 1;
+let filePond = null;
 async function init() {
     id('main').className = 'dnone';
     id('loading').className = '';
     id('mods-body').replaceChildren();
     id('dl-button').removeEventListener('click', downloadPreset);
+
+    if (filePond === null) {
+        filePond = FilePond.create(id('fupl'), {
+            itemInsertLocation: 'after',
+            credits: false,
+            dropOnPage: true,
+            dropOnElement: false,
+            dropValidation: true,
+            allowRemove: false
+        });
+
+        filePond.on('processfile', (err, file) => {
+            if (err) console.error(err);
+            else console.log('new fupl', file); // debug
+        });
+    }
 
     try {
         const presetIds = parseUrl();

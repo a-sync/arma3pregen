@@ -9,8 +9,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://community.bistudio.com/wikidata/images/6/6c/Arma3LauncherIcon.png" rel="icon" type="image/png">
 
-    <script src="https://cdn.jsdelivr.net/npm/he@1.2.0/he.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/he@1/he.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/filepond@4/dist/filepond.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/filepond@4/dist/filepond.min.css">
     <link rel="stylesheet" href="main.css">
 </head>
 
@@ -38,7 +40,6 @@
     <main id="main" class="dnone">
         <section>
             <header class="row">
-
                 <button type="button" id="dl-button">
                     <span id="dl-button-feedback"></span>
                     <span>Save <span id="dl-button-filename">arma3pregen</span>.html</span>
@@ -49,6 +50,13 @@
             <table>
                 <tbody id="mods-body"></tbody>
             </table>
+        </section>
+
+        <section>
+            <h2>Parse a preset file</h2>
+            <div>
+                <input type="file" name="fupl" id="fupl" class="filepond" accept=".html" multiple>
+            </div>
         </section>
 
         <section>
