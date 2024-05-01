@@ -41,30 +41,68 @@ function getModById(id) {
 }
 
 const DBG = 1;
-let filePond = null;
+let pond = null;
 async function init() {
     id('main').className = 'dnone';
     id('loading').className = '';
     id('mods-body').replaceChildren();
     id('dl-button').removeEventListener('click', downloadPreset);
 
-    if (filePond === null) {
+    if (pond === null) {
         FilePond.registerPlugin(FilePondPluginFileValidateType);
-        filePond = FilePond.create(id('fupl'), {
-            itemInsertLocation: 'after',
-            credits: false,
+        pond = FilePond.create(id('fupl'), {
             dropOnPage: true,
             dropOnElement: false,
-            dropValidation: true,
-            allowRemove: false
-        });
+            allowRemove: false,
+            credits: false,
+            fileValidateTypeLabelExpectedTypesMap: { 'text/html': '.html' },
+            fileValidateTypeLabelExpectedTypes: 'Arma 3 preset .html files only!',
+            fileValidateTypeDetectType: (file, type) =>
+                new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    const CHUNK_SIZE = 512;
+                    let content = '';
 
-        //debug
-        filePond.on('processfile', (err, file) => {
-            if (err) console.error(err);
-            else console.log('new fupl', file); // debug
+                    reader.onload = (event) => {
+                        content += event.target.result;
+                        if (content.includes('<meta name="arma:Type" content="preset"') || content.includes('<meta name="arma:Type" content="list"')) {
+                            resolve(type);
+                            reader.abort();
+                        } else if (content.length >= file.size) {
+                            reject();
+                            reader.abort();
+                        } else {
+                            reader.readAsText(file.slice(content.length, content.length + CHUNK_SIZE));
+                        }
+                    };
+
+                    reader.onerror = (err) => {
+                        reject();
+                        console.error('FileReader error:', err);
+                    };
+
+                    reader.readAsText(file.slice(0, CHUNK_SIZE));
+                }),
+            onaddfile: (err, fileItem) => {
+                if (err) {
+                    console.error(err);
+                } else {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        const content = event.target.result;
+                        const parsedMods = parsePresetFile(content, fileItem.filenameWithoutExtension);
+                        if (DBG) console.log('dbg:parsedMods', parsedMods);
+                    };
+
+                    reader.onerror = (err) => {
+                        reject();
+                        console.error('FileReader error:', err);
+                    };
+
+                    reader.readAsText(fileItem.file);
+                }
+            }
         });
-        //debug
     }
 
     try {
@@ -742,39 +780,50 @@ function downloadPreset() {
     element.remove();
 }
 
-// TODO: create UI to drag & drop/upload preset html to generate url
-function TODO_parsePresetFile(source) {
+function parsePresetFile(source, fileName) {
     const re = {
-        name: 'arma3pregen',
+        name: String(fileName).replace(/\W/g, '') || 'arma3pregen',
         ids: []
     };
 
-    // parses the html source and returns regex results
-    const parseA3LPreset = (src) => {
-        const name = src.match(/<meta name="arma:PresetName" content="(.*?)" \/>/);
-        // TODO: detect local mods
-        const mods = src.matchAll(/<tr data-type="(Mod|Dlc)Container">[\s\S]*?<td data-type="DisplayName">(.*?)<\/td>[\s\S]*?<a href="(.*?)" data-type="Link">(.*?)<\/a>/g); // TODO: detect local mods
-        return {
-            name,
-            mods
-        }
-    };
+    const preset_name = source.match(/<meta name="arma:PresetName" content="(.*?)" \/>/);
+    const steam_mods = source.matchAll(/<tr data-type="(Mod|Dlc)Container">[\s\S]*?<td data-type="DisplayName">(.*?)<\/td>[\s\S]*?<a href="(.*?)" data-type="Link">(.*?)<\/a>/g);
+    const local_mods = source.matchAll(/<tr data-type="ModContainer">[\s\S]*?<td data-type="DisplayName">.*?<\/td>[\s\S]*?<span class="whups" data-type="Link" data-meta="local:(.*?)" \/>/g);
 
-    const presetData = parseA3LPreset(source);
+    if (preset_name) {
+        const pname = preset_name[1].replace(/\W/g, '');
+        if (pname !== '') re.name = pname;
+    }
 
-    const pname = presetData.name[1].replace(/\W/g, '');
-    if (pname) re.name = pname;
-
-    for (const m of presetData.mods) {
-        console.log('dbg:m of presetData.mods', m); // DEBUG
+    for (const m of steam_mods) {
         if (m[3] !== m[4]) {
             console.warn('Link mismatch', m);
         }
-
         if (m[1] === 'Mod') {
-            // TODO: parse id/local mod name, and push to ids
+            const id = m[3].match(/id=([\d]*)/);
+            if (id) {
+                re.ids.push({
+                    id: id[1]
+                });
+            }
         } else if (m[1] === 'Dlc') {
-            // TODO: parse appid, and push to dlc ids
+            const id = m[3].match(/app\/([\d]*)/);
+            if (id) {
+                re.ids.push({
+                    id: id[1],
+                    _dlc: true
+                });
+            }
+        }
+    }
+
+    for (const m of local_mods) {
+        const info = m[1].split('|');
+        if (info[1]) {
+            re.ids.push({
+                id: info[1],
+                _local: true
+            });
         }
     }
 
