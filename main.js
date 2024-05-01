@@ -49,6 +49,7 @@ async function init() {
     id('dl-button').removeEventListener('click', downloadPreset);
 
     if (filePond === null) {
+        FilePond.registerPlugin(FilePondPluginFileValidateType);
         filePond = FilePond.create(id('fupl'), {
             itemInsertLocation: 'after',
             credits: false,
