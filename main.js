@@ -58,10 +58,12 @@ async function init() {
             allowRemove: false
         });
 
+        //debug
         filePond.on('processfile', (err, file) => {
             if (err) console.error(err);
             else console.log('new fupl', file); // debug
         });
+        //debug
     }
 
     try {

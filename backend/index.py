@@ -16,15 +16,23 @@ def handle_post(rh):
         rh.send_error(400, 'Invalid payload')
         return
 
+    headers = {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'User-Agent': 'arma3pregen/1.0'
+    }
+
     if data['api'] == 'app':
         resdata = []
         for id in id_list:
             conn = http.client.HTTPSConnection("store.steampowered.com")
-            conn.request("GET", "/api/appdetails?appids=" + id)
+            conn.request("GET", "/api/appdetails?appids=" + id, None, headers)
             res = conn.getresponse()
+            if res.status != 200:
+                continue
             data = json.loads(res.read())
             if data[id]['success']:
                 resdata.append(data[id]['data'])
+
         rh.send_response(200)
         rh.send_header('Content-type', 'application/json')
         rh.send_header('Cache-Control', 'max-age=' + str(CACHE_MAX_AGE))
@@ -32,10 +40,10 @@ def handle_post(rh):
         rh.wfile.write(json.dumps({"response": resdata}).encode())
     elif data['api'] == 'file' and STEAM_WEB_API_KEY:
         api = 'IPublishedFileService/GetDetails'
-        params = {
+        params = [(f"publishedfileids[{i}]", str(id_)) for i, id_ in enumerate(id_list)]
+        additional_params = {
             'key': STEAM_WEB_API_KEY,
             'appid': 107410,
-            'publishedfileids': id_list,
             'includetags': True,
             'includeadditionalpreviews': False,
             'includechildren': False,
@@ -47,37 +55,41 @@ def handle_post(rh):
             'return_playtime_stats': False,
             'strip_description_bbcode': False
         }
+        combined_params = params + tuple((key, str(value)) for key, value in additional_params.items())
+
         conn = http.client.HTTPSConnection("api.steampowered.com")
-        conn.request("GET", "/" + api + "/v1/?" + urllib.parse.urlencode(params))
+        conn.request("GET", "/" + api + "/v1/?" + urllib.parse.urlencode(combined_params), headers)
         res = conn.getresponse()
-        rh.send_response(200)
+
+        rh.send_response(res.status)
         rh.send_header('Content-type', 'application/json')
         rh.send_header('Cache-Control', 'max-age=' + str(CACHE_MAX_AGE))
         rh.end_headers()
         rh.wfile.write(res.read())
     elif data['api'] == 'file':
         api = 'ISteamRemoteStorage/GetPublishedFileDetails'
-        params = {'itemcount': len(id_list), 'publishedfileids': id_list}
-        headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+        params = [(f"publishedfileids[{i}]", str(id_)) for i, id_ in enumerate(id_list)]
+        params.append(('itemcount', len(id_list)))
+
         conn = http.client.HTTPSConnection("api.steampowered.com")
         conn.request("POST", "/" + api + "/v1/?", urllib.parse.urlencode(params), headers)
         res = conn.getresponse()
-        rh.send_response(200)
+
+        rh.send_response(res.status)
         rh.send_header('Content-type', 'application/json')
         rh.send_header('Cache-Control', 'max-age=' + str(CACHE_MAX_AGE))
         rh.end_headers()
         rh.wfile.write(res.read())
     elif data['api'] == 'collection':
-        print(f"id_list: {id_list}")
         api = 'ISteamRemoteStorage/GetCollectionDetails'
-        params = {'collectioncount': len(id_list), 'publishedfileids': id_list}
-        headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+        params = [(f"publishedfileids[{i}]", str(id_)) for i, id_ in enumerate(id_list)]
+        params.append(('collectioncount', len(id_list)))
+
         conn = http.client.HTTPSConnection("api.steampowered.com")
         conn.request("POST", "/" + api + "/v1/?", urllib.parse.urlencode(params), headers)
         res = conn.getresponse()
-        print(f"Response status: {res.status}")
-        print(f"Sending POST request to: {urllib.parse.urlencode(params)}")
-        rh.send_response(200)
+
+        rh.send_response(res.status)
         rh.send_header('Content-type', 'application/json')
         rh.send_header('Cache-Control', 'max-age=' + str(CACHE_MAX_AGE))
         rh.end_headers()
