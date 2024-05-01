@@ -73,6 +73,7 @@ Only alphanumeric characters + `_` and the optional `*` prefix/suffix is allowed
 NodeJS or PHP runtime is required to relay backend calls to the steam API. _(CORS disabled 😔)_  
 Spin up an instance on `http://localhost/` with one of these commands:
  * nodejs: `node server.js`
+ * python: `python server.py`
  * php: `php -S 0.0.0.0:80`
  * docker (php): `docker-compose up`
 
@@ -99,9 +100,7 @@ _The app can be served from under any subdomain or path._
  * https://github.com/TehGreatFred/armaModIDFormatter
 
 ## TODO
- * python backend
  * prompt for the preset name before saving if it's not set
  * resolve unmet workshop dependencies on demand
- * preset file to URL converter
  * add a section for the most recently updated mods ordered by date DESC
  * show mod size and last update on hover in modlist

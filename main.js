@@ -76,9 +76,17 @@ async function init() {
 
             render(presetIds);
             id('dl-button').addEventListener('click', downloadPreset);
+            id('loading').className = 'dnone';
+            id('main').className = '';
         } else {
-            if (confirm('Redirect to the README?')) window.location.replace('https://github.com/a-sync/arma3pregen#readme');
-            else id('loading').textContent = 'No valid IDs found in the URL.';
+            id('dl-button').className = 'dnone';
+            id('loading').replaceChildren();
+            id('loading').textContent = 'No valid IDs found in the URL.';
+            id('loading').appendChild(e('br'));
+            const a = e('a', 'README');
+            a.href = 'https://github.com/a-sync/arma3pregen#readme';
+            id('loading').appendChild(a);
+            id('main').className = '';
         }
     } catch (err) {
         console.error(err);
@@ -263,9 +271,6 @@ function render(ids) {
     }
 
     renderDownloadButton();
-
-    id('loading').className = 'dnone';
-    id('main').className = '';
 }
 
 function renderSingleItem(i, mod, collection, optionals) {
