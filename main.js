@@ -83,24 +83,23 @@ async function init() {
 
                     reader.readAsText(file.slice(0, CHUNK_SIZE));
                 }),
-            onaddfile: (err, fileItem) => {
-                if (err) {
-                    console.error(err);
-                } else {
-                    const reader = new FileReader();
-                    reader.onload = (event) => {
-                        const content = event.target.result;
-                        const parsedMods = parsePresetFile(content, fileItem.filenameWithoutExtension);
-                        if (DBG) console.log('dbg:parsedMods', parsedMods);
-                    };
+            onactivatefile: (fileItem) => {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const content = event.target.result;
+                    const parsedFile = parsePresetFile(content, fileItem.filenameWithoutExtension);
+                    if (DBG) console.log('dbg:fileItem, parsedMods', fileItem, parsedFile);
 
-                    reader.onerror = (err) => {
-                        reject();
-                        console.error('FileReader error:', err);
-                    };
+                    const originPath = window.location.origin + String(window.location.path || '');
+                    window.open(originPath + '?' + parsedFile.name + '=' + parsedFile.ids.join(','), '_blank');
+                };
 
-                    reader.readAsText(fileItem.file);
-                }
+                reader.onerror = (err) => {
+                    reject();
+                    console.error('FileReader error:', err);
+                };
+
+                reader.readAsText(fileItem.file);
             }
         });
     }
@@ -802,17 +801,12 @@ function parsePresetFile(source, fileName) {
         if (m[1] === 'Mod') {
             const id = m[3].match(/id=([\d]*)/);
             if (id) {
-                re.ids.push({
-                    id: id[1]
-                });
+                re.ids.push(id[1]);
             }
         } else if (m[1] === 'Dlc') {
             const id = m[3].match(/app\/([\d]*)/);
             if (id) {
-                re.ids.push({
-                    id: id[1],
-                    _dlc: true
-                });
+                re.ids.push('!' + id[1]);
             }
         }
     }
@@ -820,10 +814,7 @@ function parsePresetFile(source, fileName) {
     for (const m of local_mods) {
         const info = m[1].split('|');
         if (info[1]) {
-            re.ids.push({
-                id: info[1],
-                _local: true
-            });
+            re.ids.push(info[1]);
         }
     }
 
