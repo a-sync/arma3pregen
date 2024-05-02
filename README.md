@@ -6,6 +6,7 @@ Customizable Arma 3 Launcher preset files generated client side from a list of s
  * optional mods can be customized on a simple web interface on the fly
  * outputs standard Arma 3 Launcher preset files
  * remembers previously selected optional mods
+ * converts existing Arma 3 preset and list files
  * ~~client-side mod data caching~~
 
 ## URL format 

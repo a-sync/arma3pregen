@@ -55,8 +55,9 @@ async function init() {
             dropOnElement: false,
             allowRemove: false,
             credits: false,
+            labelIdle: 'drag & drop your preset files or <span class="filepond--label-action">click to browse</span>',
             fileValidateTypeLabelExpectedTypesMap: { 'text/html': '.html' },
-            fileValidateTypeLabelExpectedTypes: 'Arma 3 preset .html files only!',
+            fileValidateTypeLabelExpectedTypes: 'Arma 3 preset and list .html files only!',
             fileValidateTypeDetectType: (file, type) =>
                 new Promise((resolve, reject) => {
                     const reader = new FileReader();

@@ -442,83 +442,50 @@ dialog+.backdrop {
     -webkit-backdrop-filter: blur(4px);
     backdrop-filter: blur(4px);
 }
-/* 
-/* use a hand cursor intead of arrow for the action buttons * /
-.filepond--file-action-button {
+
+.filepond--label-action {
+    text-decoration-color: var(--links);
+}
+
+/*
+.filepond--item-panel {
+    background-color: var(--button-base);
+}
+.filepond--item-panel:hover {
+    background-color: rgba(0, 118, 209, 0.13);
+}
+*/
+
+.filepond--drip-blob {
+    background-color: var(--button-base);
+}
+
+.filepond--file {
+    color: var(--text-main);
+}
+
+.filepond--panel-root {
+    background-color: var(--background-alt);
+}
+
+.filepond--drop-label {
     cursor: pointer;
 }
 
-/* the text color of the drop label* /
-.filepond--drop-label {
-    color: #555;
-}
-
-/* underline color for "Browse" button * /
-.filepond--label-action {
-    text-decoration-color: #aaa;
-}
-
-/* the background color of the filepond drop area * /
-.filepond--panel-root {
-    background-color: #eee;
-}
-
-/* the border radius of the drop area * /
-.filepond--panel-root {
+.filepond--drop-label:hover {
+    border: 2px dashed var(--focus);
     border-radius: 0.5em;
 }
 
-/* the border radius of the file item * /
-.filepond--item-panel {
-    border-radius: 0.5em;
+.filepond--drop-label label {
+    color: var(--text-main);
+    font-family: 'Black Ops One', Helvetica, Arial, sans-serif;
+    font-size: 1.5em;
+    font-weight: 400;
+    font-variant: small-caps;
+    text-align: center;
+    cursor: pointer;
 }
-
-/* the background color of the file and file panel (used when dropping an image) * /
-.filepond--item-panel {
-    background-color: #555;
-}
-
-/* the background color of the drop circle * /
-.filepond--drip-blob {
-    background-color: #999;
-}
-
-/* the background color of the black action buttons * /
-.filepond--file-action-button {
-    background-color: rgba(0, 0, 0, 0.5);
-}
-
-/* the icon color of the black action buttons * /
-.filepond--file-action-button {
-    color: white;
-}
-
-/* the color of the focus ring * /
-.filepond--file-action-button:hover,
-.filepond--file-action-button:focus {
-    box-shadow: 0 0 0 0.125em rgba(255, 255, 255, 0.9);
-}
-
-/* the text color of the file status and info labels * /
-.filepond--file {
-    color: white;
-}
-
-/* error state color * /
-[data-filepond-item-state*='error'] .filepond--item-panel,
-[data-filepond-item-state*='invalid'] .filepond--item-panel {
-    background-color: red;
-}
-
-[data-filepond-item-state='processing-complete'] .filepond--item-panel {
-    background-color: green;
-}
-
-/* bordered drop area * /
-.filepond--panel-root {
-    background-color: transparent;
-    border: 2px solid #2c3340;
-} */
 
 .filepond--item[data-filepond-item-state='idle'] {
     cursor: pointer;
@@ -528,6 +495,4 @@ dialog+.backdrop {
     #footer a.github {
         fill: #c6cbd1;
     }
-
-    /*TODO filepond overrides*/
 }
