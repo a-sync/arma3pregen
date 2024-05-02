@@ -85,22 +85,24 @@ async function init() {
                     reader.readAsText(file.slice(0, CHUNK_SIZE));
                 }),
             onactivatefile: (fileItem) => {
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    const content = event.target.result;
-                    const parsedFile = parsePresetFile(content, fileItem.filenameWithoutExtension);
-                    if (DBG) console.log('dbg:fileItem, parsedMods', fileItem, parsedFile);
+                if (fileItem.status === 2) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        const content = event.target.result;
+                        const parsedFile = parsePresetFile(content, fileItem.filenameWithoutExtension);
+                        if (DBG) console.log('dbg:fileItem, parsedMods', fileItem, parsedFile);
 
-                    const originPath = window.location.origin + String(window.location.path || '');
-                    window.open(originPath + '?' + parsedFile.name + '=' + parsedFile.ids.join(','), '_blank');
-                };
+                        const originPath = window.location.origin + String(window.location.path || '');
+                        window.open(originPath + '?' + parsedFile.name + '=' + parsedFile.ids.join(','), '_blank');
+                    };
 
-                reader.onerror = (err) => {
-                    reject();
-                    console.error('FileReader error:', err);
-                };
+                    reader.onerror = (err) => {
+                        reject();
+                        console.error('FileReader error:', err);
+                    };
 
-                reader.readAsText(fileItem.file);
+                    reader.readAsText(fileItem.file);
+                }
             }
         });
     }

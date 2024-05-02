@@ -443,37 +443,10 @@ dialog+.backdrop {
     backdrop-filter: blur(4px);
 }
 
-.filepond--label-action {
-    text-decoration-color: var(--links);
-}
-
-.filepond--item-panel {
-    background-color: var(--button-base);
-}
-
-.filepond--item:hover .filepond--panel .filepond--item-panel {
-    background-color: var(--focus) !important;
-}
-
-.filepond--panel-top:after, .filepond--panel-bottom:before {
-    background-color: transparent;
-}
-
-.filepond--drip-blob {
-    background-color: var(--button-base);
-}
-
-.filepond--file {
-    color: var(--text-main);
-}
-
-.filepond--panel-root {
-    background-color: var(--background-alt);
-}
-
 .filepond--drop-label {
     cursor: pointer;
 }
+
 
 .filepond--drop-label:hover {
     border: 2px dashed var(--focus);
@@ -490,8 +463,36 @@ dialog+.backdrop {
     cursor: pointer;
 }
 
+.filepond--label-action {
+    text-decoration-color: var(--links);
+}
+
+.filepond--drip-blob {
+    background-color: var(--button-base);
+}
+
+.filepond--panel-root {
+    background-color: var(--background-alt);
+}
+
+.filepond--item[data-filepond-item-state='idle']:hover .filepond--panel .filepond--item-panel {
+    background-color: var(--focus) !important;
+}
+
+.filepond--panel-top:after, .filepond--panel-bottom:before {
+    background-color: transparent;
+}
+
+.filepond--item-panel {
+    background-color: var(--button-base);
+}
+
 .filepond--item[data-filepond-item-state='idle'] {
     cursor: pointer;
+}
+
+.filepond--file {
+    color: var(--text-main);
 }
 
 @media (prefers-color-scheme: dark) {
