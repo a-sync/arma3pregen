@@ -447,14 +447,17 @@ dialog+.backdrop {
     text-decoration-color: var(--links);
 }
 
-/*
 .filepond--item-panel {
     background-color: var(--button-base);
 }
-.filepond--item-panel:hover {
-    background-color: rgba(0, 118, 209, 0.13);
+
+.filepond--item:hover .filepond--panel .filepond--item-panel {
+    background-color: var(--focus) !important;
 }
-*/
+
+.filepond--panel-top:after, .filepond--panel-bottom:before {
+    background-color: transparent;
+}
 
 .filepond--drip-blob {
     background-color: var(--button-base);

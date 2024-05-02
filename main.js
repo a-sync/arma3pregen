@@ -11,8 +11,8 @@ const uniqueArray = arr => [...new Set(arr)];
 document.addEventListener('DOMContentLoaded', async () => {
     if (id('mods').showModal === undefined) {
         document.querySelector('head').insertAdjacentHTML('afterbegin', [
-            '\<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/dialog-polyfill@latest/dist/dialog-polyfill.min.css"\>',
-            '\<script src="https://cdn.jsdelivr.net/npm/dialog-polyfill@latest/dist/dialog-polyfill.min.js"\>\<\/script\>'
+            '\<link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/dialog-polyfill@latest/dist/dialog-polyfill.min.css"\>',
+            '\<script src="https://fastly.jsdelivr.net/npm/dialog-polyfill@latest/dist/dialog-polyfill.min.js"\>\<\/script\>'
         ].join(''));
     }
 
@@ -782,33 +782,39 @@ function downloadPreset() {
 
 function parsePresetFile(source, fileName) {
     const re = {
-        name: String(fileName).replace(/\W/g, '') || 'arma3pregen',
+        name: String(fileName).replace(/\s+/g, '_').replace(/\W/g, '') || 'arma3pregen',
         ids: []
     };
 
     const preset_name = source.match(/<meta name="arma:PresetName" content="(.*?)" \/>/);
-    const steam_mods = source.matchAll(/<tr data-type="(Mod|Dlc)Container">[\s\S]*?<td data-type="DisplayName">(.*?)<\/td>[\s\S]*?<a href="(.*?)" data-type="Link">(.*?)<\/a>/g);
+    const dlcs = source.matchAll(/<tr data-type="DlcContainer">[\s\S]*?<td data-type="DisplayName">.*?<\/td>[\s\S]*?<a href="(.*?)" data-type="Link">(.*?)<\/a>/g);
+    const steam_mods = source.matchAll(/<tr data-type="ModContainer">[\s\S]*?<td data-type="DisplayName">.*?<\/td>[\s\S]*?<a href="(.*?)" data-type="Link">(.*?)<\/a>/g);
     const local_mods = source.matchAll(/<tr data-type="ModContainer">[\s\S]*?<td data-type="DisplayName">.*?<\/td>[\s\S]*?<span class="whups" data-type="Link" data-meta="local:(.*?)" \/>/g);
 
     if (preset_name) {
-        const pname = preset_name[1].replace(/\W/g, '');
+        const pname = preset_name[1].replace(/\s+/g, '_').replace(/\W/g, '');
         if (pname !== '') re.name = pname;
     }
 
-    for (const m of steam_mods) {
-        if (m[3] !== m[4]) {
+    for (const m of dlcs) {
+        if (m[1] !== m[2]) {
             console.warn('Link mismatch', m);
         }
-        if (m[1] === 'Mod') {
-            const id = m[3].match(/id=([\d]*)/);
-            if (id) {
-                re.ids.push(id[1]);
-            }
-        } else if (m[1] === 'Dlc') {
-            const id = m[3].match(/app\/([\d]*)/);
-            if (id) {
-                re.ids.push('!' + id[1]);
-            }
+
+        const id = m[1].match(/app\/([\d]*)/);
+        if (id) {
+            re.ids.push('!' + id[1]);
+        }
+    }
+
+    for (const m of steam_mods) {
+        if (m[1] !== m[2]) {
+            console.warn('Link mismatch', m);
+        }
+
+        const id = m[1].match(/id=([\d]*)/);
+        if (id) {
+            re.ids.push(id[1]);
         }
     }
 
