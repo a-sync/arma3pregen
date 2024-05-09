@@ -3,8 +3,7 @@ const { createServer } = require('http');
 const { URL } = require('url');
 const backend = require('./backend/index.js');
 
-const APP_HOST = process.env.app_host || process.env.APP_HOST || '0.0.0.0';
-const APP_PORT = parseInt(process.env.app_port || process.env.APP_PORT || '80', 10);
+const APP_PORT = parseInt(process.env.PORT || '80', 10);
 
 createServer((req, res) => {
     // console.log('DBG: %j %j', (new Date()), req.url);
@@ -27,4 +26,4 @@ createServer((req, res) => {
     }
 }).listen(APP_PORT);
 
-console.log('Web service started %s:%s', APP_HOST, APP_PORT);
+console.log('Web service started %s:%s', '0.0.0.0', PORT);

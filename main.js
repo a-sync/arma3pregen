@@ -232,25 +232,34 @@ async function parsePresetIds(presetIds) {
         }
     }
 
-    if (workshopIds.length + modIds.length > 0) {
-        const mods = await fetch('backend/', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ api: 'file', payload: workshopIds.concat(modIds) })
-        }).then(res => res.json());
+    const allIds = workshopIds.concat(modIds);
+    if (allIds.length > 0) {
+        const promises = [];
 
-        if (mods.error) console.error(mods.error);
-        else if (mods.response && (mods.response.resultcount > 0 || (mods.response.publishedfiledetails && mods.response.publishedfiledetails.length > 0))) {
-            for (const f of mods.response.publishedfiledetails) {
-                if (VALID_APP_IDS.includes(f.consumer_app_id) || VALID_APP_IDS.includes(f.consumer_appid)) {
-                    if (collectionChildren[f.publishedfileid]) f._children = collectionChildren[f.publishedfileid];
-                    if (f.result && f.result !== 9) modDetails.push(f);
+        for (let i = 0; i < allIds.length; i += 100) {
+            promises.push(fetch('backend/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ api: 'file', payload: allIds.slice(i, i + 100) })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.error) console.error(data.error);
+                else if (data.response && (data.response.resultcount > 0 || (data.response.publishedfiledetails && data.response.publishedfiledetails.length > 0))) {
+                    for (const f of data.response.publishedfiledetails) {
+                        if (VALID_APP_IDS.includes(f.consumer_app_id) || VALID_APP_IDS.includes(f.consumer_appid)) {
+                            if (collectionChildren[f.publishedfileid]) f._children = collectionChildren[f.publishedfileid];
+                            if (f.result && f.result !== 9) modDetails.push(f);
+                        }
+                    }
                 }
-            }
+            }));
         }
+
+        await Promise.allSettled(promises);
     }
 
-    if (dlcAppIds.length) {
+    if (dlcAppIds.length > 0) {
         const dlcs = await Promise.all(dlcAppIds.map(appId => fetch('backend/', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

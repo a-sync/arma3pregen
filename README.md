@@ -82,7 +82,8 @@ _The app can be served from under any subdomain or path._
 
 ### Environmental variables
 `CACHE_MAX_AGE` controls the browser cache for backend requests in seconds. _[default: 0]_  
-`STEAM_WEB_API_KEY` enables the usage of [API key](https://steamcommunity.com/dev/apikey) protected steam endpoints. (optional) _[default: empty]_  
+`STEAM_WEB_API_KEY` enables the usage of [API key](https://steamcommunity.com/dev/apikey) protected steam endpoints. (optional but recommended ⚠) _[default: empty]_  
+ ⤷ _the public API fails on some workshop IDs where the key protected one returns details just fine 🤷‍♂️_
 
 ## Similar projects
  * https://github.com/ColinM9991/Arma-Preset-Creator
