@@ -41,6 +41,10 @@ Only numbers and the optional `*` prefix/suffix is allowed.
 Items starting with `@` are added to the preset as local mods.  
 Only alphanumeric characters + `_` and the optional `*` prefix/suffix is allowed.
 
+## Limitations
+Both the client (web browser) and the server (web server) impose restrictions on the maximum supported length of a URL. A reasonable limit is approximately 2000 characters across various applications. This allows for approximately 150 mods in a single arma3pregen URL.  
+If you need more then you should use collections to condense the list into a single workshop ID.
+
 ## Examples
  * FNF: [arma3pregen.devs.space/?FNF=1551644814,1551648858\*](https://arma3pregen.devs.space/?FNF=1551644814,1551648858*)
    * **FNF**
