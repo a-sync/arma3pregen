@@ -494,6 +494,10 @@ dialog+.backdrop {
     color: var(--text-main);
 }
 
+.filepond--file-info {
+    pointer-events: auto;
+}
+
 @media (prefers-color-scheme: dark) {
     #footer a.github {
         fill: #c6cbd1;
