@@ -26,4 +26,4 @@ createServer((req, res) => {
     }
 }).listen(APP_PORT);
 
-console.log('Web service started %s:%s', '0.0.0.0', PORT);
+console.log('Web service started on port %s', PORT);

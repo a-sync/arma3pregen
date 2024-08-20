@@ -84,26 +84,7 @@ async function init() {
 
                     reader.readAsText(file.slice(0, CHUNK_SIZE));
                 }),
-            onactivatefile: (fileItem) => {
-                if (fileItem.status === 2) {
-                    const reader = new FileReader();
-                    reader.onload = (event) => {
-                        const content = event.target.result;
-                        const parsedFile = parsePresetFile(content, fileItem.filenameWithoutExtension);
-                        if (DBG) console.log('dbg:fileItem, parsedMods', fileItem, parsedFile);
-
-                        const originPath = window.location.origin + String(window.location.path || '');
-                        window.open(originPath + '?' + parsedFile.name + '=' + parsedFile.ids.join(','), '_blank');
-                    };
-
-                    reader.onerror = (err) => {
-                        reject();
-                        console.error('FileReader error:', err);
-                    };
-
-                    reader.readAsText(fileItem.file);
-                }
-            }
+            onaddfile: fileAdded
         });
     }
 
@@ -311,7 +292,7 @@ function render(ids) {
                 for (const c of m._children) {
                     const cm = getModById(c);
                     if (cm) renderSingleItem(cm.publishedfileid, cm, m, optionals);
-                    else console.error('No mod found for child ID', cm);
+                    else console.error('No mod found for child ID', c);
                 }
             }
         } else console.error('No mod found for ID', i.id);
@@ -837,4 +818,35 @@ function parsePresetFile(source, fileName) {
     }
 
     return re;
+}
+
+function fileAdded (err, fileItem) {
+    if (err) {
+        console.error('Add file error', err);
+    } else {
+        if (DBG) console.log('dbg:fileItem', fileItem);
+
+        if (fileItem.status === 2) {
+            const fileInfoMain = id('filepond--item-' + fileItem.id).querySelector('div.filepond--file span.filepond--file-info-main');
+            const a = e('a', fileItem.filename);
+            a.setAttribute('target', '_blank');
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const content = event.target.result;
+                const parsedFile = parsePresetFile(content, fileItem.filenameWithoutExtension);
+                if (DBG) console.log('dbg:parsedFile', parsedFile);
+
+                const originPath = window.location.origin + String(window.location.path || '');
+                a.setAttribute('href', originPath + '?' + parsedFile.name + '=' + parsedFile.ids.join(','));
+                fileInfoMain.replaceChildren(a);
+            };
+
+            reader.onerror = (err) => {
+                console.error('FileReader error:', err);
+            };
+
+            reader.readAsText(fileItem.file);
+        }
+    }
 }

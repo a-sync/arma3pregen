@@ -55,7 +55,7 @@ def handle_post(rh):
             'return_playtime_stats': False,
             'strip_description_bbcode': False
         }
-        combined_params = params + tuple((key, str(value)) for key, value in additional_params.items())
+        combined_params = tuple(params) + tuple((key, str(value)) for key, value in additional_params.items())
 
         conn = http.client.HTTPSConnection("api.steampowered.com")
         conn.request("GET", "/" + api + "/v1/?" + urllib.parse.urlencode(combined_params), headers)

@@ -42,7 +42,11 @@ class RequestHandler(BaseHTTPRequestHandler):
 def run(server_class=HTTPServer, handler_class=RequestHandler):
     server_address = ('', PORT)
     httpd = server_class(server_address, handler_class)
-    httpd.serve_forever()
+    try:
+        httpd.serve_forever()
+    except KeyboardInterrupt:
+        httpd.shutdown()
 
 if __name__ == "__main__":
+    print(f"Web service starting on port {PORT}")
     run()
