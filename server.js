@@ -3,7 +3,7 @@ const { createServer } = require('http');
 const { URL } = require('url');
 const backend = require('./backend/index.js');
 
-const APP_PORT = parseInt(process.env.PORT || '80', 10);
+const PORT = parseInt(process.env.PORT || '80', 10);
 
 createServer((req, res) => {
     // console.log('DBG: %j %j', (new Date()), req.url);
@@ -24,6 +24,6 @@ createServer((req, res) => {
         res.writeHead(404, { 'Content-Type': 'text/html' });
         res.end('<html><head></head><body>404 &#x1F4A2</body></html>');
     }
-}).listen(APP_PORT);
+}).listen(PORT);
 
 console.log('Web service started on port %s', PORT);
