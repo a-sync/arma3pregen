@@ -839,6 +839,7 @@ function fileAdded (err, fileItem) {
 
                 const originPath = window.location.origin + String(window.location.path || '');
                 a.setAttribute('href', originPath + '?' + parsedFile.name + '=' + parsedFile.ids.join(','));
+                fileInfoMain.removeAttribute('aria-hidden');
                 fileInfoMain.replaceChildren(a);
             };
 
