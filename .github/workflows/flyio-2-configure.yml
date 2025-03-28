@@ -1,0 +1,63 @@
+name: ⚙ Configure fly.io app
+
+on:
+  workflow_dispatch:
+    inputs:
+      steam_web_api_key:
+        description: 'Steam web API key'
+        type: string
+      cache_max_age:
+        description: 'Cache max age (seconds)'
+        type: number
+
+
+jobs:
+  configure:
+    name: 🛬 Create/update or delete secrets
+    runs-on: ubuntu-latest
+    env:
+      FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+    steps:
+      - name: Mask inputs
+        id: masked_inputs
+        run: |
+          INP_STEAM_WEB_API_KEY=$(jq -r '.inputs.steam_web_api_key' $GITHUB_EVENT_PATH)
+          INP_CACHE_MAX_AGE=$(jq -r '.inputs.cache_max_age' $GITHUB_EVENT_PATH)
+          echo ::add-mask::$INP_STEAM_WEB_API_KEY
+          echo ::add-mask::$INP_CACHE_MAX_AGE
+          echo steam_web_api_key=$INP_STEAM_WEB_API_KEY >> $GITHUB_OUTPUT
+          echo cache_max_age=$INP_CACHE_MAX_AGE >> $GITHUB_OUTPUT
+          echo SET_ARGS='' >> $GITHUB_ENV
+          echo UNSET_ARGS='' >> $GITHUB_ENV
+
+      - if: inputs.steam_web_api_key != '' && inputs.steam_web_api_key != '-'
+        run: echo SET_ARGS='${{ env.SET_ARGS }} STEAM_WEB_API_KEY="${{ steps.masked_inputs.outputs.steam_web_api_key }}"' >> $GITHUB_ENV
+      - if: inputs.steam_web_api_key == '-'
+        run: echo UNSET_ARGS='${{ env.UNSET_ARGS }} STEAM_WEB_API_KEY' >> $GITHUB_ENV
+
+      - if: inputs.cache_max_age != '' && inputs.cache_max_age != '-'
+        run: echo SET_ARGS='${{ env.SET_ARGS }} CACHE_MAX_AGE="${{ steps.masked_inputs.outputs.cache_max_age }}"' >> $GITHUB_ENV
+      - if: inputs.cache_max_age == '-'
+        run: echo UNSET_ARGS='${{ env.UNSET_ARGS }} CACHE_MAX_AGE' >> $GITHUB_ENV
+
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+        if: env.SET_ARGS != '' || env.UNSET_ARGS != ''
+
+      - name: Set app name
+        run: |
+          if [[ -n "${{ secrets.FLY_APP_NAME }}" ]]; then
+            echo "APP_NAME=${{ secrets.FLY_APP_NAME }}" >> $GITHUB_ENV
+          else
+            echo "APP_NAME=${REPO_OWNER,,}-arma3pregen" >> $GITHUB_ENV
+          fi
+        env:
+          REPO_OWNER: '${{ github.repository_owner }}'
+
+      - name: 💼 Set secrets on fly.io
+        if: env.SET_ARGS != ''
+        run: flyctl secrets set${{ env.SET_ARGS }} --app ${{ env.APP_NAME }}
+
+      - name: 🗑 Unset secrets on fly.io
+        if: env.UNSET_ARGS != ''
+        run: flyctl secrets unset${{ env.UNSET_ARGS }} --app ${{ env.APP_NAME }}

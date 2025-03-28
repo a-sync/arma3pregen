@@ -89,6 +89,10 @@ _The app can be served from under any subdomain or path._
 `STEAM_WEB_API_KEY` enables the usage of [API key](https://steamcommunity.com/dev/apikey) protected steam endpoints. (optional but recommended ⚠) _[default: empty]_  
  ⤷ _the public API fails on some workshop IDs where the key protected one returns details just fine 🤷‍♂️_
 
+### Fly.io deployment
+GitHub action workflow scripts help you setup and continuosly deploy your app on fly.io.
+Configure `FLY_API_TOKEN`, `FLY_REGION` and optionally `FLY_APP_NAME` in github secrets, then run those actions in order.
+
 ## Similar projects
  * https://github.com/ColinM9991/Arma-Preset-Creator
  * https://github.com/AgentBlackout/A3PresetTools
