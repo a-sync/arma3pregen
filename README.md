@@ -75,7 +75,7 @@ If you need more then you can use collections to condense the list into a single
    * _[!288520](https://store.steampowered.com/app/288520) Arma 3 Karts (DLC)_
 
 ## Self hosting
-NodeJS or PHP runtime is required to relay backend calls to the steam API. _(CORS disabled 😔)_  
+NodeJS, PHP, Python or Docker is required to relay backend calls to the steam API. _(CORS disabled 😔)_  
 Spin up an instance on `http://localhost/` with one of these commands:
  * nodejs: `node server.js`
  * python: `python server.py`
@@ -85,13 +85,14 @@ Spin up an instance on `http://localhost/` with one of these commands:
 _The app can be served from under any subdomain or path._
 
 ### Environmental variables
+`PORT` controls the listener port of NodeJS and Python servers. _[default: 80]_  
 `CACHE_MAX_AGE` controls the browser cache for backend requests in seconds. _[default: 0]_  
 `STEAM_WEB_API_KEY` enables the usage of [API key](https://steamcommunity.com/dev/apikey) protected steam endpoints. (optional but recommended ⚠) _[default: empty]_  
  ⤷ _the public API fails on some workshop IDs where the key protected one returns details just fine 🤷‍♂️_
 
 ### Fly.io deployment
 GitHub action workflow scripts help you setup and continuosly deploy your app on fly.io.
-Configure `FLY_API_TOKEN`, `FLY_REGION` and optionally `FLY_APP_NAME` in github secrets, then run those actions in order.
+Configure `FLY_API_TOKEN`, `FLY_REGION` and optionally `FLY_APP_NAME` in GitHub actions secrets, then run those actions in order.
 
 ## Similar projects
  * https://github.com/ColinM9991/Arma-Preset-Creator

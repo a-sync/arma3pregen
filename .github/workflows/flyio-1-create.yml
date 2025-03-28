@@ -1,4 +1,4 @@
-name: 🏗 Create fly.io app
+name: 1. 🏗 Create fly.io app
 
 on:
   workflow_dispatch:
@@ -24,6 +24,3 @@ jobs:
 
       - name: 🧱 Create fly.io app
         run: flyctl apps create ${{ env.APP_NAME }} --org personal
-
-      - name: 💽 Create fly.io volume
-        run: flyctl volumes create arma3pregen_data --size 1 --region ${{ secrets.FLY_REGION }} --app ${{ env.APP_NAME }} --yes

@@ -247,6 +247,7 @@ header>h1,
 
 summary {
     text-align: center;
+    width: 100%;
 }
 
 summary:focus,

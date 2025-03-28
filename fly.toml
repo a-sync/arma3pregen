@@ -1,13 +1,7 @@
 app = "arma3pregen"
 
 [env]
-  DBG = "0"
-  DATA_PATH = "/data/"
-  REFRESH_TIME_MINUTES = "2"
-
-[mounts]
-  source = "arma3pregen_data"
-  destination = "/data"
+  PORT = "8080"
 
 [http_service]
   internal_port = 8080
