@@ -5,6 +5,9 @@ FROM node:20
 LABEL fly_launch_runtime="Node.js"
 
 WORKDIR /app
+
+COPY . .
+
 ENV NODE_ENV="production"
 ENV PORT="8080"
 
