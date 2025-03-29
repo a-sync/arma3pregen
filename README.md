@@ -46,10 +46,10 @@ Both the client (web browser) and the server (web server) impose restrictions on
 If you need more then you can use collections to condense the list into a single workshop ID.
 
 ## Examples
- * FNF: [arma3pregen.devs.space/?FNF=1551644814,1551648858\*](https://arma3pregen.devs.space/?FNF=1551644814,1551648858*)
+ * FNF: [arma3pregen.devs.space/?FNF=2905668937\*,2905664671](https://arma3pregen.devs.space/?FNF=2905668937*,2905664671*)
    * **FNF**
-   * [1551644814](https://steamcommunity.com/sharedfiles/filedetails/?id=1551644814) FNF Required Mods Collection (collection)
-   * _[1551648858](https://steamcommunity.com/sharedfiles/filedetails/?id=1551648858) FNF Optional Mods Collection (collection)_
+   * _[2905668937](https://steamcommunity.com/sharedfiles/filedetails/?id=2905668937) FNF Optional Mods Collection (collection)_
+   * [2905664671](https://steamcommunity.com/sharedfiles/filedetails/?id=2905664671) FNF Required Mods Collection (collection)
  * FNF WW2: [arma3pregen.devs.space/?FNF_WW2=1769913157,2120184260\*](https://arma3pregen.devs.space/?FNF_WW2=1769913157,2120184260*)
    * **FNF_WW2**
    * [1769913157](https://steamcommunity.com/sharedfiles/filedetails/?id=1769913157) FNF WW2 Mod Collection (collection)
