@@ -33,4 +33,4 @@ jobs:
           REPO_OWNER: '${{ github.repository_owner }}'
 
       - name: 🛩 Deploy to fly.io
-        run: flyctl deploy --remote-only --auto-confirm --regions ${{ secrets.FLY_REGION }} --app ${{ env.APP_NAME }}
+        run: flyctl deploy --remote-only --yes --ha=false --primary-region=${{ secrets.FLY_REGION }} --regions=${{ secrets.FLY_REGION }} --app=${{ env.APP_NAME }}
