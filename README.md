@@ -46,7 +46,7 @@ Both the client (web browser) and the server (web server) impose restrictions on
 If you need more then you can use collections to condense the list into a single workshop ID.
 
 ## Examples
- * FNF: [arma3pregen.fly.dev/?FNF=2905668937\*,2905664671](https://arma3pregen.fly.dev/?FNF=2905668937*,2905664671*)
+ * FNF: [arma3pregen.fly.dev/?FNF=2905668937\*,2905664671](https://arma3pregen.fly.dev/?FNF=2905668937*,2905664671)
    * **FNF**
    * _[2905668937](https://steamcommunity.com/sharedfiles/filedetails/?id=2905668937) FNF Optional Mods Collection (collection)_
    * [2905664671](https://steamcommunity.com/sharedfiles/filedetails/?id=2905664671) FNF Required Mods Collection (collection)
